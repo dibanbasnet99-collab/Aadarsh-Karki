@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aadash Karki // Cyber Portfolio & Matrix Terminal</title>
+  
+  <!-- Google Fonts: Monospace Cyber Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Share+Tech+Mono&family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       CYBER / MATRIX / HACKER THEME SYSTEM
+       ========================================================================== */
+    :root {
+      --bg-dark: #000b00;
+      --bg-darker: #020803;
+      --bg-card: rgba(2, 20, 7, 0.85);
+      --bg-card-hover: rgba(0, 35, 12, 0.92);
+      --border-color: rgba(0, 255, 102, 0.25);
+      --border-glow: rgba(0, 255, 102, 0.6);
+      --accent-neon: #00FF66;
+      --accent-bright: #00FF41;
+      --accent-glow: rgba(0, 255, 102, 0.4);
+      --text-main: #e0ffe8;
+      --text-muted: #4dab6e;
+      --text-dim: #007a2f;
+      --font-mono: 'Share Tech Mono', 'Fira Code', 'JetBrains Mono', monospace;
+      --scanline-opacity: 0.15;
+    }
+
+    /* Theme Color Variations */
+    body.theme-cyan {
+      --accent-neon: #00F3FF;
+      --accent-bright: #00D8FF;
+      --accent-glow: rgba(0, 243, 255, 0.4);
+      --border-color: rgba(0, 243, 255, 0.25);
+      --text-main: #e0faff;
+      --text-muted: #4db3ab;
+    }
+
+    body.theme-amber {
+      --accent-neon: #FFB000;
+      --accent-bright: #FF8C00;
+      --accent-glow: rgba(255, 176, 0, 0.4);
+      --border-color: rgba(255, 176, 0, 0.25);
+      --text-main: #fffbe0;
+      --text-muted: #ab9b4d;
+    }
+
+    body.theme-red {
+      --accent-neon: #FF0055;
+      --accent-bright: #FF0033;
+      --accent-glow: rgba(255, 0, 85, 0.4);
+      --border-color: rgba(255, 0, 85, 0.25);
+      --text-main: #ffe0e8;
+      --text-muted: #ab4d6e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent-neon) var(--bg-darker);
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-darker);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--text-dim);
+      border-radius: 2px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-neon);
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      overflow-x: hidden;
+      line-height: 1.5;
+      font-size: 15px;
+    }
+
+    /* ==========================================================================
+       CANVAS & CRT SCANLINE OVERLAY
+       ========================================================================== */
+    #matrix-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .dark-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(0, 11, 0, 0.65) 0%, rgba(1, 8, 2, 0.92) 80%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .scanlines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 99;
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.25) 50%
+      ), linear-gradient(
+        90deg,
+        rgba(255, 0, 0, 0.03),
+        rgba(0, 255, 0, 0.01),
+        rgba(0, 0, 255, 0.03)
+      );
+      background-size: 100% 3px, 6px 100%;
+      opacity: var(--scanline-opacity);
+    }
+
+    /* ==========================================================================
+       APP CONTAINER & LAYOUT
+       ========================================================================== */
+    .app-container {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 24px 80px 24px;
+    }
+
+    /* Nav Bar */
+    .nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: rgba(2, 16, 6, 0.85);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 0 15px rgba(0, 255, 102, 0.08);
+      backdrop-filter: blur(8px);
+      margin-bottom: 28px;
+      border-radius: 4px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      color: var(--accent-neon);
+      text-shadow: 0 0 8px var(--accent-glow);
+      letter-spacing: 1px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-neon);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-neon);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(0.8); }
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      transition: all 0.2s ease;
+      padding: 4px 8px;
+      border: 1px solid transparent;
+      border-radius: 2px;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--accent-neon);
+      border-color: var(--border-color);
+      background: rgba(0, 255, 102, 0.06);
+      text-shadow: 0 0 5px var(--accent-glow);
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-icon {
+      background: rgba(0, 20, 5, 0.6);
+      border: 1px solid var(--border-color);
+      color: var(--accent-neon);
+      padding: 4px 10px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-icon:hover {
+      border-color: var(--accent-neon);
+      box-shadow: 0 0 10px var(--accent-glow);
+      background: rgba(0, 255, 102, 0.12);
+    }
+
+    /* Section Component Frames */
+    .cyber-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 255, 102, 0.02);
+      backdrop-filter: blur(10px);
+      border-radius: 4px;
+      padding: 24px;
+      margin-bottom: 32px;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .cyber-card:hover {
+      border-color: rgba(0, 255, 102, 0.45);
+      box-shadow: 0 0 20px rgba(0, 255, 102, 0.12);
+    }
+
+    /* Terminal Window Header Bar */
+    .terminal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 25, 8, 0.9);
+      border-bottom: 1px solid var(--border-color);
+      padding: 8px 14px;
+      margin: -24px -24px 20px -24px;
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .terminal-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .terminal-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--text-dim);
+    }
+    .dot-close { background: #ff5f56; }
+    .dot-min { background: #ffbd2e; }
+    .dot-max { background: #27c93f; }
+
+    .section-title {
+      color: var(--accent-neon);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-shadow: 0 0 8px var(--accent-glow);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ==========================================================================
+       HERO HEADER SECTION
+       ========================================================================== */
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 32px;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+        justify-items: center;
+      }
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 180px;
+      height: 180px;
+    }
+
+    .avatar-frame {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2px solid var(--accent-neon);
+      box-shadow: 0 0 25px var(--accent-glow), inset 0 0 15px var(--accent-glow);
+      overflow: hidden;
+      position: relative;
+      background: #021205;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .avatar-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: contrast(1.15) brightness(0.95);
+    }
+
+    .avatar-radar {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 1px dashed var(--accent-neon);
+      opacity: 0.4;
+      animation: rotateRadar 12s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes rotateRadar {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Glitch Title Animation */
+    .glitch-text {
+      position: relative;
+      font-size: 38px;
+      font-weight: 700;
+      color: var(--accent-neon);
+      letter-spacing: 2px;
+      text-shadow: 0 0 12px var(--accent-glow);
+      display: inline-block;
+    }
+
+    .glitch-text::before,
+    .glitch-text::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      clip: rect(0, 0, 0, 0);
+    }
+
+    .glitch-text::before {
+      left: -2px;
+      text-shadow: 2px 0 #ff0055;
+      animation: glitch-anim-1 2.5s infinite linear alternate-reverse;
+    }
+
+    .glitch-text::after {
+      left: 2px;
+      text-shadow: -2px 0 #00f3ff;
+      animation: glitch-anim-2 2s infinite linear alternate-reverse;
+    }
+
+    @keyframes glitch-anim-1 {
+      0% { clip: rect(20px, 9999px, 15px, 0); }
+      20% { clip: rect(42px, 9999px, 80px, 0); }
+      40% { clip: rect(10px, 9999px, 85px, 0); }
+      60% { clip: rect(50px, 9999px, 20px, 0); }
+      80% { clip: rect(75px, 9999px, 40px, 0); }
+      100% { clip: rect(5px, 9999px, 60px, 0); }
+    }
+
+    @keyframes glitch-anim-2 {
+      0% { clip: rect(65px, 9999px, 100px, 0); }
+      20% { clip: rect(12px, 9999px, 30px, 0); }
+      40% { clip: rect(80px, 9999px, 5px, 0); }
+      60% { clip: rect(25px, 9999px, 55px, 0); }
+      80% { clip: rect(40px, 9999px, 90px, 0); }
+      100% { clip: rect(95px, 9999px, 15px, 0); }
+    }
+
+    .hero-subtitle {
+      color: var(--text-main);
+      font-size: 17px;
+      margin: 10px 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .typing-cursor {
+      display: inline-block;
+      width: 9px;
+      height: 18px;
+      background-color: var(--accent-neon);
+      margin-left: 2px;
+      animation: blink 0.9s infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .hero-tags {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .cyber-badge {
+      background: rgba(0, 255, 102, 0.08);
+      border: 1px solid var(--border-color);
+      color: var(--accent-neon);
+      padding: 3px 10px;
+      border-radius: 2px;
+      font-size: 12px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: rgba(0, 255, 102, 0.15);
+      border: 1px solid var(--accent-neon);
+      color: var(--accent-neon);
+      padding: 8px 18px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: all 0.25s ease;
+      text-shadow: 0 0 5px var(--accent-glow);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-neon);
+      color: #000;
+      box-shadow: 0 0 20px var(--accent-glow);
+      text-shadow: none;
+      transform: translateY(-2px);
+    }
+
+    /* ==========================================================================
+       REAL-TIME "TIME SPENT ON EARTH" COUNTER
+       ========================================================================== */
+    .counter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .counter-card {
+      background: rgba(0, 15, 5, 0.8);
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      border-radius: 3px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .counter-card:hover {
+      border-color: var(--accent-neon);
+      background: rgba(0, 30, 10, 0.9);
+      box-shadow: 0 0 15px rgba(0, 255, 102, 0.15);
+    }
+
+    .counter-val {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--accent-neon);
+      text-shadow: 0 0 10px var(--accent-glow);
+      margin: 4px 0;
+      font-family: 'Fira Code', monospace;
+    }
+
+    .counter-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .life-progress-bar-container {
+      margin-top: 24px;
+      background: rgba(0, 20, 5, 0.6);
+      border: 1px solid var(--border-color);
+      padding: 12px 16px;
+      border-radius: 3px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 12px;
+      background: rgba(0, 40, 15, 0.8);
+      border: 1px solid var(--border-color);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 8px;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--text-dim) 0%, var(--accent-neon) 100%);
+      box-shadow: 0 0 10px var(--accent-neon);
+      width: 14%; /* 14 years / 100 benchmark */
+      transition: width 1s linear;
+    }
+
+    /* ==========================================================================
+       ABOUT & BIO TERMINAL
+       ========================================================================== */
+    .bio-content {
+      background: rgba(0, 10, 3, 0.95);
+      padding: 18px;
+      border-radius: 3px;
+      border: 1px solid rgba(0, 255, 102, 0.15);
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .terminal-cmd {
+      color: var(--accent-bright);
+      font-weight: bold;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .bio-line {
+      margin-bottom: 6px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .bio-key {
+      color: var(--text-muted);
+      min-width: 110px;
+    }
+
+    .bio-val {
+      color: var(--text-main);
+    }
+
+    /* ==========================================================================
+       SKILLS TERMINAL
+       ========================================================================== */
+    .skills-filter {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: rgba(0, 20, 5, 0.6);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 5px 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+
+    .filter-btn.active, .filter-btn:hover {
+      background: rgba(0, 255, 102, 0.15);
+      border-color: var(--accent-neon);
+      color: var(--accent-neon);
+    }
+
+    .skills-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .skill-chip {
+      background: rgba(0, 25, 8, 0.85);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 16px;
+      border-radius: 3px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .skill-chip:hover {
+      border-color: var(--accent-neon);
+      background: rgba(0, 255, 102, 0.15);
+      color: var(--accent-neon);
+      box-shadow: 0 0 15px var(--accent-glow);
+      transform: translateY(-2px);
+    }
+
+    .skill-icon {
+      color: var(--accent-neon);
+      font-weight: bold;
+    }
+
+    /* ==========================================================================
+       PROJECTS SECTION
+       ========================================================================== */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .project-card {
+      background: rgba(1, 18, 6, 0.85);
+      border: 1px solid var(--border-color);
+      padding: 20px;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .project-card:hover {
+      border-color: var(--accent-neon);
+      box-shadow: 0 0 20px rgba(0, 255, 102, 0.18);
+      transform: translateY(-4px);
+      background: rgba(0, 30, 10, 0.95);
+    }
+
+    .project-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--accent-neon);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .project-desc {
+      color: var(--text-main);
+      font-size: 13.5px;
+      margin-bottom: 16px;
+      line-height: 1.6;
+      opacity: 0.9;
+    }
+
+    .project-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .project-tag {
+      font-size: 11px;
+      color: var(--text-muted);
+      background: rgba(0, 255, 102, 0.06);
+      border: 1px solid rgba(0, 255, 102, 0.2);
+      padding: 2px 8px;
+      border-radius: 2px;
+    }
+
+    .project-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-code {
+      background: rgba(0, 20, 5, 0.8);
+      border: 1px solid var(--border-color);
+      color: var(--accent-neon);
+      padding: 6px 14px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.2s;
+      width: 100%;
+      text-align: center;
+    }
+
+    .btn-code:hover {
+      background: var(--accent-neon);
+      color: #000;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    /* ==========================================================================
+       CONTACT FORM & TERMINAL LOGS
+       ========================================================================== */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .cyber-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .form-input, .form-textarea {
+      background: rgba(0, 15, 4, 0.9);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 14px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      border-radius: 3px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+      border-color: var(--accent-neon);
+      box-shadow: 0 0 12px var(--accent-glow);
+      background: rgba(0, 25, 8, 0.95);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 110px;
+    }
+
+    .log-window {
+      background: rgba(0, 8, 2, 0.95);
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      padding: 14px;
+      font-size: 12px;
+      height: 100%;
+      min-height: 220px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .log-item {
+      color: var(--text-muted);
+      word-break: break-word;
+    }
+    .log-item.success {
+      color: var(--accent-neon);
+    }
+    .log-item.info {
+      color: #00f3ff;
+    }
+
+    /* ==========================================================================
+       FOOTER & MODALS
+       ========================================================================== */
+    .footer {
+      border-top: 1px solid var(--border-color);
+      padding-top: 20px;
+      margin-top: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .footer-status {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Terminal Modal CLI */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .terminal-modal {
+      width: 100%;
+      max-width: 800px;
+      height: 520px;
+      background: rgba(0, 10, 3, 0.96);
+      border: 1px solid var(--accent-neon);
+      box-shadow: 0 0 35px var(--accent-glow);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .terminal-modal-body {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      font-size: 13.5px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .cli-input-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 20, 5, 0.8);
+      border-top: 1px solid var(--border-color);
+      padding: 10px 16px;
+    }
+
+    .cli-prompt {
+      color: var(--accent-bright);
+      font-weight: bold;
+    }
+
+    .cli-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MATRIX DIGITAL RAIN CANVAS -->
+  <canvas id="matrix-canvas"></canvas>
+  <div class="dark-overlay"></div>
+  <div id="scanlines" class="scanlines"></div>
+
+  <!-- MAIN APPLICATION CONTENT -->
+  <div class="app-container">
+
+    <!-- NAV BAR -->
+    <header class="nav-bar">
+      <div class="nav-brand">
+        <div class="pulse-dot"></div>
+        <span>AADASH_KARKI // NODE_JHAPA-7</span>
+      </div>
+
+      <nav class="nav-links">
+        <a href="#about" class="nav-link">[ ABOUT ]</a>
+        <a href="#runtime" class="nav-link">[ TELEMETRY ]</a>
+        <a href="#skills" class="nav-link">[ TECH_STACK ]</a>
+        <a href="#projects" class="nav-link">[ PROJECTS ]</a>
+        <a href="#contact" class="nav-link">[ TRANSMIT ]</a>
+      </nav>
+
+      <div class="nav-controls">
+        <button id="btn-sound" class="btn-icon" title="Toggle Sound Synthesis">
+          <span>🔊 AUDIO: <span id="sound-status">ON</span></span>
+        </button>
+        <button id="btn-theme" class="btn-icon" title="Cycle Accent Color">
+          <span>🟢 MATRIX</span>
+        </button>
+        <button id="btn-cli-open" class="btn-icon" title="Launch Interactive Terminal CLI">
+          <span>💻 CLI</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- HERO HEADER SECTION -->
+    <section class="cyber-card" id="hero">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="terminal-dot dot-close"></span>
+          <span class="terminal-dot dot-min"></span>
+          <span class="terminal-dot dot-max"></span>
+        </div>
+        <span>user@nepal-node:~ /identity_profile</span>
+        <span>STATUS: ACTIVE</span>
+      </div>
+
+      <div class="hero-grid">
+        <!-- AVATAR CONTAINER -->
+        <div class="avatar-wrapper">
+          <div class="avatar-radar"></div>
+          <div class="avatar-frame">
+            <!-- Stylized Matrix Hacker Avatar Image -->
+            <img id="profile-img" src="./src/assets/images/aadash_profile_photo_1786174241606.jpg" alt="Aadash Karki Profile Avatar" referrerPolicy="no-referrer">
+          </div>
+          <div style="margin-top: 10px; text-align: center;">
+            <label for="upload-photo-input" class="btn-icon" style="cursor: pointer; font-size: 11px;">
+              <span>📷 CHANGE_PHOTO</span>
+            </label>
+            <input type="file" id="upload-photo-input" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)">
+          </div>
+        </div>
+
+        <!-- HERO INFO -->
+        <div>
+          <h1 class="glitch-text" data-text="AADASH KARKI">AADASH KARKI</h1>
+          
+          <div class="hero-subtitle">
+            <span style="color: var(--accent-bright); font-weight: bold;">$ ></span>
+            <span id="typed-subtitle">Cyber Enthusiast & Web Developer | Jhapa-7, Nepal</span>
+            <span class="typing-cursor"></span>
+          </div>
+
+          <div class="hero-tags">
+            <span class="cyber-badge">DOB: 2014-02-27 (Feb 27, 2014)</span>
+            <span class="cyber-badge">LOCATION: JHAPA-7, NEPAL</span>
+            <span class="cyber-badge">ROLE: WEB ARCHITECT & CODER</span>
+            <span class="cyber-badge">ENCRYPTION: AES-256</span>
+          </div>
+
+          <p style="color: var(--text-main); font-size: 14px; margin-bottom: 20px; max-width: 650px; opacity: 0.9;">
+            Building high-performance interactive web experiences, matrix digital graphics, and exploring software development from Jhapa, Nepal.
+          </p>
+
+          <div class="hero-actions">
+            <button class="btn-primary" onclick="openTerminalModal()">
+              <span>💻 LAUNCH_TERMINAL_CLI</span>
+            </button>
+            <a href="#runtime" class="btn-primary" style="text-decoration: none;">
+              <span>⏱️ LIFE_RUNTIME</span>
+            </a>
+            <a href="https://www.facebook.com/share/1TvJQwimwx/" target="_blank" rel="noopener noreferrer" class="btn-primary" style="text-decoration: none;">
+              <span>🔵 FACEBOOK_PROFILE</span>
+            </a>
+            <a href="#contact" class="btn-primary" style="text-decoration: none;">
+              <span>📡 SEND_PACKET</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REAL-TIME "TIME SPENT ON EARTH" LIVE COUNTER -->
+    <section class="cyber-card" id="runtime">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="terminal-dot dot-close"></span>
+          <span class="terminal-dot dot-min"></span>
+          <span class="terminal-dot dot-max"></span>
+        </div>
+        <span>[ LIFE_RUNTIME_COUNTER // SUBJECT_AADASH ]</span>
+        <span>INTERVAL: 1000ms</span>
+      </div>
+
+      <div class="section-title">
+        <span>⏱️ [ LIFE_RUNTIME_COUNTER ]</span>
+      </div>
+
+      <p style="color: var(--text-muted); font-size: 13px; margin-top: 6px;">
+        Telemetry metrics calculating exact temporal duration spent on planet Earth (Assumed DOB: February 27, 2014 / 2014-02-27).
+      </p>
+
+      <div class="counter-grid">
+        <div class="counter-card">
+          <div class="counter-val" id="cnt-years">14</div>
+          <div class="counter-label">Total Years</div>
+        </div>
+        <div class="counter-card">
+          <div class="counter-val" id="cnt-days">5,113</div>
+          <div class="counter-label">Days Lived</div>
+        </div>
+        <div class="counter-card">
+          <div class="counter-val" id="cnt-hours">122,712</div>
+          <div class="counter-label">Hours Elapsed</div>
+        </div>
+        <div class="counter-card">
+          <div class="counter-val" id="cnt-minutes">7,362,720</div>
+          <div class="counter-label">Minutes Lived</div>
+        </div>
+        <div class="counter-card">
+          <div class="counter-val" id="cnt-seconds">441,763,200</div>
+          <div class="counter-label">Seconds Live</div>
+        </div>
+        <div class="counter-card">
+          <div class="counter-val" id="cnt-space">13.82B</div>
+          <div class="counter-label">Earth Orbit (km)</div>
+        </div>
+      </div>
+
+      <div class="life-progress-bar-container">
+        <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
+          <span>LIFE_RUNTIME_LEVEL: 14 YRS</span>
+          <span>SYSTEM_BENCHMARK: LEVEL 100</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="life-progress-fill"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TERMINAL ABOUT ME / BIO -->
+    <section class="cyber-card" id="about">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="terminal-dot dot-close"></span>
+          <span class="terminal-dot dot-min"></span>
+          <span class="terminal-dot dot-max"></span>
+        </div>
+        <span>bash - 80x24 - $ cat bio.txt</span>
+        <span>UTF-8</span>
+      </div>
+
+      <div class="section-title" style="margin-bottom: 16px;">
+        <span>📄 [ ABOUT_ME // BIO.TXT ]</span>
+      </div>
+
+      <div class="bio-content">
+        <span class="terminal-cmd">$ cat bio.txt</span>
+        
+        <div class="bio-line">
+          <span class="bio-key">[ NAME ]:</span>
+          <span class="bio-val">Aadash Karki</span>
+        </div>
+        <div class="bio-line">
+          <span class="bio-key">[ DOB ]:</span>
+          <span class="bio-val">February 27, 2014 (2014-02-27)</span>
+        </div>
+        <div class="bio-line">
+          <span class="bio-key">[ LOCATION ]:</span>
+          <span class="bio-val">Jhapa-7, Jhapa District, Koshi Province, Nepal</span>
+        </div>
+        <div class="bio-line">
+          <span class="bio-key">[ BIOGRAPHY ]:</span>
+          <span class="bio-val">14-year-old tech enthusiast, coder, and digital explorer based in Jhapa-7. Passionate about cyber aesthetics, web development, and building interactive web experiences.</span>
+        </div>
+        <div class="bio-line">
+          <span class="bio-key">[ INTERESTS ]:</span>
+          <span class="bio-val">Web Engineering, Matrix Graphics, Python Tools, Linux CLI, Retro Interfaces, Cyber Security Basics.</span>
+        </div>
+        <div class="bio-line">
+          <span class="bio-key">[ MISSION ]:</span>
+          <span class="bio-val">Continuous learning, building open-source projects, and connecting with global tech creators.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE SKILLS TERMINAL -->
+    <section class="cyber-card" id="skills">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="terminal-dot dot-close"></span>
+          <span class="terminal-dot dot-min"></span>
+          <span class="terminal-dot dot-max"></span>
+        </div>
+        <span>[ TECH_STACK // INTERACTIVE_NODES ]</span>
+        <span>COUNT: 10</span>
+      </div>
+
+      <div class="section-title" style="margin-bottom: 16px;">
+        <span>🛠️ [ TECH_STACK // SKILL_MATRIX ]</span>
+      </div>
+
+      <div class="skills-filter">
+        <button class="filter-btn active" onclick="filterSkills('all', this)">[ ALL_MODULES ]</button>
+        <button class="filter-btn" onclick="filterSkills('frontend', this)">[ FRONTEND ]</button>
+        <button class="filter-btn" onclick="filterSkills('tools', this)">[ TOOLS & CLI ]</button>
+        <button class="filter-btn" onclick="filterSkills('core', this)">[ CORE LOGIC ]</button>
+      </div>
+
+      <div class="skills-grid" id="skills-container">
+        <!-- Skill Chips populated by JS or rendered inline -->
+        <div class="skill-chip" data-cat="frontend" onclick="inspectSkill('HTML5', '95%', 'Semantic structuring, modern DOM APIs, canvas graphics', 'div, canvas, audio')">
+          <span class="skill-icon">&lt;/&gt;</span>
+          <span>HTML5 & Canvas 2D</span>
+        </div>
+
+        <div class="skill-chip" data-cat="frontend" onclick="inspectSkill('CSS3 & Glassmorphism', '90%', 'Tailwind CSS, Flexbox/Grid, Animations, Cyber Themes', 'backdrop-filter, animations')">
+          <span class="skill-icon">🎨</span>
+          <span>CSS3 / Cyber Styling</span>
+        </div>
+
+        <div class="skill-chip" data-cat="frontend" onclick="inspectSkill('JavaScript ES6+', '88%', 'Async/Await, DOM manipulation, Web Audio, Event Listeners', 'Promises, Web APIs')">
+          <span class="skill-icon">⚡</span>
+          <span>JavaScript (Vanilla)</span>
+        </div>
+
+        <div class="skill-chip" data-cat="core" onclick="inspectSkill('Python 3', '82%', 'Automation scripts, data parsing, logic algorithms', 'import sys, os')">
+          <span class="skill-icon">🐍</span>
+          <span>Python 3</span>
+        </div>
+
+        <div class="skill-chip" data-cat="tools" onclick="inspectSkill('Git & GitHub', '85%', 'Repository management, branching, open-source deployment', 'git commit, push')">
+          <span class="skill-icon">📦</span>
+          <span>Git & Version Control</span>
+        </div>
+
+        <div class="skill-chip" data-cat="tools" onclick="inspectSkill('Linux CLI & Bash', '80%', 'Terminal shell navigation, scripting, system monitoring', 'bash, grep, ssh')">
+          <span class="skill-icon">🐧</span>
+          <span>Linux Terminal CLI</span>
+        </div>
+
+        <div class="skill-chip" data-cat="frontend" onclick="inspectSkill('Cyber & Matrix UI', '92%', 'Glitch VFX, CRT scanlines, matrix rain canvas, retro UX', 'HTML5 Canvas, Glitch CSS')">
+          <span class="skill-icon">❇️</span>
+          <span>Cyber & Matrix UI</span>
+        </div>
+
+        <div class="skill-chip" data-cat="frontend" onclick="inspectSkill('Web Audio API', '78%', 'Real-time sound synthesis, retro bleeps, audio graphs', 'AudioContext, Oscillators')">
+          <span class="skill-icon">🔊</span>
+          <span>Web Audio API</span>
+        </div>
+
+        <div class="skill-chip" data-cat="core" onclick="inspectSkill('React Basics', '75%', 'Component architecture, state hooks, props, Vite', 'useState, useEffect')">
+          <span class="skill-icon">⚛️</span>
+          <span>React.js Basics</span>
+        </div>
+
+        <div class="skill-chip" data-cat="tools" onclick="inspectSkill('Network & Cyber Basics', '80%', 'Packet mechanics, HTTP status, encryption awareness', 'AES-256, TCP/IP')">
+          <span class="skill-icon">🔐</span>
+          <span>Cyber Security Basics</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS SECTION -->
+    <section class="cyber-card" id="projects">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="terminal-dot dot-close"></span>
+          <span class="terminal-dot dot-min"></span>
+          <span class="terminal-dot dot-max"></span>
+        </div>
+        <span>[ PROJECTS_PORTFOLIO // DEPLOYED_NODES ]</span>
+        <span>TOTAL: 3</span>
+      </div>
+
+      <div class="section-title" style="margin-bottom: 20px;">
+        <span>🚀 [ DEPLOYED_PROJECTS ]</span>
+      </div>
+
+      <div class="projects-grid">
+        <!-- PROJECT 1 -->
+        <div class="project-card">
+          <div>
+            <div class="project-title">
+              <span>Matrix Rain Engine v2.0</span>
+              <span style="font-size: 11px; color: var(--accent-neon);">[ LIVE ]</span>
+            </div>
+            <p class="project-desc">
+              High-performance HTML5 Canvas digital rain generator featuring configurable drop speeds, character sets (Binary, Katakana, Hex), and mouse interaction repulsion.
+            </p>
+            <div class="project-tags">
+              <span class="project-tag">JavaScript</span>
+              <span class="project-tag">HTML5 Canvas</span>
+              <span class="project-tag">VFX</span>
+            </div>
+          </div>
+          <div class="project-actions">
+            <button class="btn-code" onclick="runProjectDemo('Matrix Rain Engine v2.0', 'Matrix Digital Rain Canvas initialized.\n[INFO] Canvas Resolution: 100%\n[INFO] Characters/Col: Katakana + Hex\n[INFO] Rendering at 60 FPS smoothly.')">
+              $ ./run_demo.sh
+            </button>
+          </div>
+        </div>
+
+        <!-- PROJECT 2 -->
+        <div class="project-card">
+          <div>
+            <div class="project-title">
+              <span>Cyber Shell Terminal CLI</span>
+              <span style="font-size: 11px; color: var(--accent-neon);">[ LIVE ]</span>
+            </div>
+            <p class="project-desc">
+              Lightweight in-browser hacker command prompt supporting 15+ built-in utilities, tab auto-complete, command history, and custom accent themes.
+            </p>
+            <div class="project-tags">
+              <span class="project-tag">Vanilla JS</span>
+              <span class="project-tag">CLI Architecture</span>
+              <span class="project-tag">Keyboard Listener</span>
+            </div>
+          </div>
+          <div class="project-actions">
+            <button class="btn-code" onclick="openTerminalModal()">
+              $ ./launch_cli.sh
+            </button>
+          </div>
+        </div>
+
+        <!-- PROJECT 3 -->
+        <div class="project-card">
+          <div>
+            <div class="project-title">
+              <span>Earth Runtime Telemetry</span>
+              <span style="font-size: 11px; color: var(--accent-neon);">[ LIVE ]</span>
+            </div>
+            <p class="project-desc">
+              Real-time biological and astronomical telemetry calculator computing exact elapsed time, earth orbit distance, and heartbeats lived by human subjects.
+            </p>
+            <div class="project-tags">
+              <span class="project-tag">JavaScript Math</span>
+              <span class="project-tag">Temporal Telemetry</span>
+              <span class="project-tag">Grid UI</span>
+            </div>
+          </div>
+          <div class="project-actions">
+            <button class="btn-code" onclick="runProjectDemo('Earth Runtime Telemetry', 'Calculating Subject: Aadash Karki\n[DOB]: 2014-02-27 (February 27, 2014)\n[STATUS]: Temporal Telemetry Active\n[ORBIT]: Calculating orbital distance...')">
+              $ ./run_demo.sh
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT FORM & PACKET TRANSMITTER -->
+    <section class="cyber-card" id="contact">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="terminal-dot dot-close"></span>
+          <span class="terminal-dot dot-min"></span>
+          <span class="terminal-dot dot-max"></span>
+        </div>
+        <span>[ PACKET_TRANSMITTER // TRANSMIT_MESSAGE ]</span>
+        <span>PORT: 443</span>
+      </div>
+
+      <div class="section-title" style="margin-bottom: 20px;">
+        <span>📡 [ TERMINAL_CONTACT_FORM ]</span>
+      </div>
+
+      <div class="contact-grid">
+        <!-- FORM -->
+        <form class="cyber-form" id="contact-form" onsubmit="transmitPacket(event)">
+          <div class="form-group">
+            <label class="form-label">$ set SENDER_NAME</label>
+            <input type="text" class="form-input" id="inp-name" placeholder="e.g., Cyber Guest" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">$ set SENDER_EMAIL</label>
+            <input type="email" class="form-input" id="inp-email" placeholder="e.g., guest@matrix.net" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">$ set PACKET_PAYLOAD (MESSAGE)</label>
+            <textarea class="form-textarea" id="inp-msg" placeholder="Type message payload..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn-primary" style="justify-content: center;">
+            <span>📡 SEND_PACKET</span>
+          </button>
+        </form>
+
+        <!-- TRANSMISSION LOG WINDOW -->
+        <div>
+          <div class="form-label" style="margin-bottom: 6px;">$ tail -f transmission.log</div>
+          <div class="log-window" id="log-window">
+            <div class="log-item">[0.00s] Transmitter initialized at Node Jhapa-7.</div>
+            <div class="log-item">[0.01s] Waiting for packet payload input...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+        <span>© 2026 Aadash Karki | Jhapa-7, Nepal</span>
+        <a href="https://www.facebook.com/share/1TvJQwimwx/" target="_blank" rel="noopener noreferrer" class="nav-link" style="color: var(--accent-neon); border: 1px solid var(--border-color); background: rgba(0, 255, 102, 0.08); padding: 4px 10px; border-radius: 3px; font-weight: 600; text-decoration: none;">
+          🔵 FACEBOOK: https://www.facebook.com/share/1TvJQwimwx/
+        </a>
+      </div>
+
+      <div class="footer-status">
+        <div class="status-item">
+          <div class="pulse-dot"></div>
+          <span>STATUS: ONLINE</span>
+        </div>
+        <div class="status-item">
+          <span>LOCATION: JHAPA-7, NEPAL</span>
+        </div>
+        <div class="status-item">
+          <span>LATENCY: <span id="val-latency">12ms</span></span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- INTERACTIVE TERMINAL MODAL CLI -->
+  <div class="modal-overlay" id="cli-modal" onclick="closeModalOnOverlay(event)">
+    <div class="terminal-modal">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="terminal-dot dot-close" onclick="closeTerminalModal()" style="cursor: pointer;"></span>
+          <span class="terminal-dot dot-min"></span>
+          <span class="terminal-dot dot-max"></span>
+        </div>
+        <span>aadash@nepal-node:~ /interactive_shell</span>
+        <span onclick="closeTerminalModal()" style="cursor: pointer; color: var(--accent-neon);">[ ESC / CLOSE ]</span>
+      </div>
+
+      <div class="terminal-modal-body" id="modal-cli-body">
+        <div style="color: var(--accent-neon); font-weight: bold;">
+          Aadash Karki Cyber Shell v2.4 (Jhapa-7 Node)
+        </div>
+        <div style="color: var(--text-muted); margin-bottom: 10px;">
+          Type 'help' to view available system commands.
+        </div>
+      </div>
+
+      <div class="cli-input-line">
+        <span class="cli-prompt">aadash@jhapa-7:~$</span>
+        <input type="text" class="cli-input" id="cli-input-field" placeholder="type a command... (e.g. help, bio, skills)" autocomplete="off">
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLICATION LOGIC & ANIMATIONS -->
+  <script>
+    /* ==========================================================================
+       1. MATRIX DIGITAL RAIN CANVAS ENGINE
+       ========================================================================== */
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    // Character Sets (Matrix Katakana + Binary + Hex)
+    const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+    const latin = '0123456789ABCDEF01';
+    const matrixChars = (katakana + latin).split('');
+
+    const fontSize = 14;
+    let columns = Math.floor(width / fontSize);
+    let drops = Array(columns).fill(1);
+
+    function drawMatrix() {
+      // Translucent black rectangle to create trailing decay
+      ctx.fillStyle = 'rgba(0, 11, 0, 0.06)';
+      ctx.fillRect(0, 0, width, height);
+
+      // Get current theme accent color or default
+      const computedAccent = getComputedStyle(document.body).getPropertyValue('--accent-bright').trim() || '#00FF41';
+
+      ctx.font = fontSize + 'px monospace';
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+        
+        // Head glow white character occasionally
+        if (Math.random() > 0.92) {
+          ctx.fillStyle = '#FFFFFF';
+        } else {
+          ctx.fillStyle = computedAccent;
+        }
+
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    let matrixInterval = setInterval(drawMatrix, 33);
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      columns = Math.floor(width / fontSize);
+      drops = Array(columns).fill(1);
+    });
+
+    /* ==========================================================================
+       2. REAL-TIME "TIME SPENT ON EARTH" LIVE COUNTER & PHOTO UPLOAD
+       ========================================================================== */
+    // DOB: February 27, 2014 (2014-02-27)
+    const dob = new Date('2014-02-27T00:00:00');
+
+    function updateLifeCounter() {
+      const now = new Date();
+      const diffMs = now - dob;
+
+      const totalSeconds = Math.floor(diffMs / 1000);
+      const totalMinutes = Math.floor(totalSeconds / 60);
+      const totalHours = Math.floor(totalMinutes / 60);
+      const totalDays = Math.floor(totalHours / 24);
+      const totalYears = (totalDays / 365.25).toFixed(2);
+      
+      // Estimated Earth orbit distance traveled (~107,000 km/h)
+      const orbitKm = ((totalHours * 107000) / 1000000000).toFixed(2) + 'B';
+
+      document.getElementById('cnt-years').textContent = totalYears;
+      document.getElementById('cnt-days').textContent = totalDays.toLocaleString();
+      document.getElementById('cnt-hours').textContent = totalHours.toLocaleString();
+      document.getElementById('cnt-minutes').textContent = totalMinutes.toLocaleString();
+      document.getElementById('cnt-seconds').textContent = totalSeconds.toLocaleString();
+      document.getElementById('cnt-space').textContent = orbitKm;
+
+      // Update progress bar percentage benchmark
+      const progressFill = document.getElementById('life-progress-fill');
+      if (progressFill) {
+        const pct = Math.min(100, Math.max(1, (parseFloat(totalYears) / 100) * 100));
+        progressFill.style.width = pct + '%';
+      }
+    }
+
+    function handlePhotoUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const profileImg = document.getElementById('profile-img');
+          if (profileImg) {
+            profileImg.src = e.target.result;
+            playBleep(1200, 'square', 0.15);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    setInterval(updateLifeCounter, 1000);
+    updateLifeCounter();
+
+    /* ==========================================================================
+       3. WEB AUDIO SYNTHESIZER (RETRO BLEEPS)
+       ========================================================================== */
+    let audioEnabled = true;
+    let audioCtx = null;
+
+    function playBleep(freq = 600, type = 'sine', duration = 0.05) {
+      if (!audioEnabled) return;
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        // Audio fallback silent fail
+      }
+    }
+
+    document.getElementById('btn-sound').addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      document.getElementById('sound-status').textContent = audioEnabled ? 'ON' : 'OFF';
+      if (audioEnabled) playBleep(800, 'triangle', 0.1);
+    });
+
+    /* ==========================================================================
+       4. THEME ACCENT SWITCHER
+       ========================================================================== */
+    const themes = ['default', 'theme-cyan', 'theme-amber', 'theme-red'];
+    let currentThemeIdx = 0;
+
+    document.getElementById('btn-theme').addEventListener('click', () => {
+      document.body.classList.remove(...themes);
+      currentThemeIdx = (currentThemeIdx + 1) % themes.length;
+      if (themes[currentThemeIdx] !== 'default') {
+        document.body.classList.add(themes[currentThemeIdx]);
+      }
+      playBleep(1000, 'square', 0.08);
+    });
+
+    /* ==========================================================================
+       5. SKILLS FILTERING & INSPECTOR
+       ========================================================================== */
+    function filterSkills(category, btnElem) {
+      playBleep(500, 'sine', 0.04);
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      btnElem.classList.add('active');
+
+      const chips = document.querySelectorAll('.skill-chip');
+      chips.forEach(chip => {
+        if (category === 'all' || chip.getAttribute('data-cat') === category) {
+          chip.style.display = 'flex';
+        } else {
+          chip.style.display = 'none';
+        }
+      });
+    }
+
+    function inspectSkill(name, level, desc, codeSnippet) {
+      playBleep(750, 'triangle', 0.08);
+      openTerminalModal();
+      const body = document.getElementById('modal-cli-body');
+      
+      const skillLog = document.createElement('div');
+      skillLog.innerHTML = `
+        <div style="color: var(--accent-neon); font-weight: bold; margin-top: 8px;">
+          $ inspect_module --name "${name}"
+        </div>
+        <div style="color: var(--text-main); margin-left: 10px;">
+          > Proficiency Level : <span style="color: var(--accent-bright); font-weight: bold;">${level}</span><br>
+          > Description       : ${desc}<br>
+          > Sample Syntax     : <code style="color: var(--accent-neon); background: rgba(0,20,5,0.8); padding: 2px 6px;">${codeSnippet}</code>
+        </div>
+      `;
+      body.appendChild(skillLog);
+      body.scrollTop = body.scrollHeight;
+    }
+
+    /* ==========================================================================
+       6. INTERACTIVE TERMINAL CLI MODAL LOGIC
+       ========================================================================== */
+    const cliModal = document.getElementById('cli-modal');
+    const cliInputField = document.getElementById('cli-input-field');
+    const modalCliBody = document.getElementById('modal-cli-body');
+
+    function openTerminalModal() {
+      playBleep(800, 'square', 0.1);
+      cliModal.classList.add('active');
+      cliInputField.focus();
+    }
+
+    function closeTerminalModal() {
+      cliModal.classList.remove('active');
+    }
+
+    function closeModalOnOverlay(e) {
+      if (e.target === cliModal) {
+        closeTerminalModal();
+      }
+    }
+
+    document.getElementById('btn-cli-open').addEventListener('click', openTerminalModal);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && cliModal.classList.contains('active')) {
+        closeTerminalModal();
+      }
+    });
+
+    cliInputField.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const cmd = cliInputField.value.trim();
+        cliInputField.value = '';
+        if (cmd) {
+          executeCliCommand(cmd);
+        }
+      }
+    });
+
+    function executeCliCommand(cmd) {
+      playBleep(650, 'sine', 0.05);
+
+      // Append command prompt line
+      const cmdLine = document.createElement('div');
+      cmdLine.innerHTML = `<span style="color: var(--accent-bright); font-weight: bold;">aadash@jhapa-7:~$</span> ${escapeHtml(cmd)}`;
+      modalCliBody.appendChild(cmdLine);
+
+      const respLine = document.createElement('div');
+      respLine.style.marginBottom = '10px';
+
+      const cleanCmd = cmd.toLowerCase();
+
+      switch (cleanCmd) {
+        case 'help':
+          respLine.innerHTML = `
+            <div style="color: var(--accent-neon);">AVAILABLE COMMANDS:</div>
+            &nbsp;&nbsp;bio      - Display Aadash Karki profile & details<br>
+            &nbsp;&nbsp;skills   - List technical skills & proficiency<br>
+            &nbsp;&nbsp;projects - Show deployed web projects<br>
+            &nbsp;&nbsp;runtime  - Show live Earth runtime counter<br>
+            &nbsp;&nbsp;location - Information on Jhapa-7, Nepal<br>
+            &nbsp;&nbsp;clear    - Clear terminal output<br>
+            &nbsp;&nbsp;exit     - Close terminal modal
+          `;
+          break;
+
+        case 'bio':
+          respLine.innerHTML = `
+            > Name: Aadash Karki<br>
+            > DOB: 2014-02-27 (February 27, 2014) | Address: Jhapa-7, Nepal<br>
+            > Bio: Tech enthusiast, coder, and digital explorer passionate about web development and cyber aesthetics.
+          `;
+          break;
+
+        case 'skills':
+          respLine.innerHTML = `
+            > Skills: HTML5, CSS3, JavaScript, Python 3, Git, Linux CLI, Cyber UI, Web Audio API, React Basics.
+          `;
+          break;
+
+        case 'projects':
+          respLine.innerHTML = `
+            > 1. Matrix Rain Engine v2.0 (Canvas VFX)<br>
+            > 2. Cyber Shell Terminal CLI (JS UX)<br>
+            > 3. Earth Runtime Telemetry (Temporal Math)
+          `;
+          break;
+
+        case 'runtime':
+          const now = new Date();
+          const diffMs = now - dob;
+          const secs = Math.floor(diffMs / 1000);
+          respLine.innerHTML = `> Subject: Aadash Karki | Earth Runtime: ${secs.toLocaleString()} seconds lived.`;
+          break;
+
+        case 'location':
+          respLine.innerHTML = `> Coordinates: Jhapa-7, Jhapa District, Koshi Province, Nepal [26.5451° N, 87.8920° E].`;
+          break;
+
+        case 'clear':
+          modalCliBody.innerHTML = '';
+          return;
+
+        case 'exit':
+          closeTerminalModal();
+          return;
+
+        default:
+          respLine.innerHTML = `<span style="color: #ff5f56;">Command not recognized: '${escapeHtml(cmd)}'. Type 'help' for command list.</span>`;
+          break;
+      }
+
+      modalCliBody.appendChild(respLine);
+      modalCliBody.scrollTop = modalCliBody.scrollHeight;
+    }
+
+    function runProjectDemo(title, logOutput) {
+      openTerminalModal();
+      const body = document.getElementById('modal-cli-body');
+      
+      const demoLog = document.createElement('div');
+      demoLog.innerHTML = `
+        <div style="color: var(--accent-neon); font-weight: bold; margin-top: 8px;">
+          $ ./run_demo.sh --project "${title}"
+        </div>
+        <div style="color: var(--text-main); white-space: pre-wrap; font-size: 12.5px; background: rgba(0,15,4,0.9); padding: 10px; border: 1px solid var(--border-color); border-radius: 3px; margin-top: 4px;">
+${logOutput}
+        </div>
+      `;
+      body.appendChild(demoLog);
+      body.scrollTop = body.scrollHeight;
+    }
+
+    /* ==========================================================================
+       7. CONTACT PACKET TRANSMITTER
+       ========================================================================== */
+    function transmitPacket(e) {
+      e.preventDefault();
+      playBleep(900, 'square', 0.12);
+
+      const name = document.getElementById('inp-name').value;
+      const email = document.getElementById('inp-email').value;
+      const msg = document.getElementById('inp-msg').value;
+
+      const logWindow = document.getElementById('log-window');
+
+      const log1 = document.createElement('div');
+      log1.className = 'log-item info';
+      log1.textContent = `[${new Date().toLocaleTimeString()}] Encrypting message packet from ${name}...`;
+      logWindow.appendChild(log1);
+
+      setTimeout(() => {
+        const log2 = document.createElement('div');
+        log2.className = 'log-item info';
+        log2.textContent = `[+] Routing packet through Jhapa-7 Node Gateway...`;
+        logWindow.appendChild(log2);
+
+        setTimeout(() => {
+          const log3 = document.createElement('div');
+          log3.className = 'log-item success';
+          log3.textContent = `[✓] TRANSMISSION SUCCESSFUL (HTTP 200 OK). Thank you, ${name}!`;
+          logWindow.appendChild(log3);
+          logWindow.scrollTop = logWindow.scrollHeight;
+
+          // Clear inputs
+          document.getElementById('inp-name').value = '';
+          document.getElementById('inp-email').value = '';
+          document.getElementById('inp-msg').value = '';
+        }, 600);
+      }, 400);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
