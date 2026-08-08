@@ -972,14 +972,8 @@
         <div class="avatar-wrapper">
           <div class="avatar-radar"></div>
           <div class="avatar-frame">
-            <!-- Stylized Matrix Hacker Avatar Image -->
-            <img id="profile-img" src="./src/assets/images/aadash_profile_photo_1786174241606.jpg" alt="Aadash Karki Profile Avatar" referrerPolicy="no-referrer">
-          </div>
-          <div style="margin-top: 10px; text-align: center;">
-            <label for="upload-photo-input" class="btn-icon" style="cursor: pointer; font-size: 11px;">
-              <span>📷 CHANGE_PHOTO</span>
-            </label>
-            <input type="file" id="upload-photo-input" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)">
+            <!-- Permanent Aadash Karki Profile Avatar Image -->
+            <img id="profile-img" src="./src/assets/images/aadash_permanent_photo_1786191408602.jpg" alt="Aadash Karki Profile Avatar" referrerPolicy="no-referrer">
           </div>
         </div>
 
@@ -1484,21 +1478,6 @@
       if (progressFill) {
         const pct = Math.min(100, Math.max(1, (parseFloat(totalYears) / 100) * 100));
         progressFill.style.width = pct + '%';
-      }
-    }
-
-    function handlePhotoUpload(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const profileImg = document.getElementById('profile-img');
-          if (profileImg) {
-            profileImg.src = e.target.result;
-            playBleep(1200, 'square', 0.15);
-          }
-        };
-        reader.readAsDataURL(file);
       }
     }
 
