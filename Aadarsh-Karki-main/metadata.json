@@ -1,0 +1,6 @@
+{
+  "name": "Aadash Karki - Cyber Portfolio",
+  "description": "Interactive matrix and hacker styled cyber portfolio for Aadash Karki.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

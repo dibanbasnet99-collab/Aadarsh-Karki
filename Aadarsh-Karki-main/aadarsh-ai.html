@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aadarsh AI // Interactive Shell</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #000b00;
+    --accent: #00FF66;
+    --accent-bright: #00FF41;
+    --border: rgba(0,255,102,0.25);
+    --text: #e0ffe8;
+    --muted: #4dab6e;
+    --red: #ff5f56;
+    --font: 'Share Tech Mono', 'Fira Code', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+  .scanlines {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.25) 50%);
+    background-size: 100% 3px;
+    opacity: 0.15;
+  }
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(2,16,6,0.85);
+  }
+  .topbar a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 3px;
+  }
+  .topbar a:hover { color: var(--accent); border-color: var(--accent); }
+  .brand { color: var(--accent); font-weight: bold; letter-spacing: 1px; }
+  .ascii {
+    text-align: center;
+    padding: 1.5rem 1rem 0.5rem;
+    font-size: 0.55rem;
+    line-height: 1.1;
+    color: var(--accent);
+    text-shadow: 0 0 6px var(--border);
+    white-space: pre;
+  }
+  .sub {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    padding-bottom: 1rem;
+  }
+  .blink { animation: blink 1s steps(2, start) infinite; }
+  @keyframes blink { to { visibility: hidden; } }
+  main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 0 1rem 1rem;
+  }
+  #thread {
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    font-size: 0.92rem;
+    padding-top: 1rem;
+  }
+  .empty { color: var(--muted); font-size: 0.85rem; margin-top: 1.5rem; }
+  .line-user .prompt { color: #ffb020; margin-right: 0.4rem; }
+  .line-ai .prompt { color: var(--accent); margin-right: 0.4rem; }
+  .line-ai { white-space: pre-wrap; line-height: 1.55; }
+  .line-error { color: #ff8877; }
+  .line-error .prompt { color: var(--red); margin-right: 0.4rem; }
+  .thinking { color: var(--muted); font-style: italic; }
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 0.9rem 1rem;
+    display: flex;
+    justify-content: center;
+  }
+  form {
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(2,16,6,0.85);
+    border: 1px solid var(--border);
+    padding: 0.55rem 0.8rem;
+  }
+  form .prompt { color: #ffb020; }
+  #q {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 0.92rem;
+    outline: none;
+  }
+  #q::placeholder { color: #0f4023; }
+  button {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--accent);
+    font-family: var(--font);
+    font-size: 0.8rem;
+    padding: 0.35rem 0.8rem;
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+</style>
+</head>
+<body>
+  <div class="scanlines"></div>
+
+  <div class="topbar">
+    <span class="brand">AADARSH_AI</span>
+    <a href="index.html">&larr; BACK_TO_PORTFOLIO</a>
+  </div>
+
+  <pre class="ascii"> █████╗  █████╗ ██████╗  █████╗ ██████╗ ███████╗██╗  ██╗
+██╔══██╗██╔══██╗██╔══██╗██╔══██╗██╔══██╗██╔════╝██║  ██║
+███████║███████║██║  ██║███████║██████╔╝███████╗███████║
+██╔══██║██╔══██║██║  ██║██╔══██║██╔══██╗╚════██║██╔══██║
+██║  ██║██║  ██║██████╔╝██║  ██║██║  ██║███████║██║  ██║
+╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
+                                                A I</pre>
+  <div class="sub">system online. ask anything.<span class="blink">_</span></div>
+
+  <main><div id="thread">
+    <div class="empty" id="empty-msg">[ready] no input received yet. type a question below and press enter.</div>
+  </div></main>
+
+  <footer>
+    <form id="ask-form">
+      <span class="prompt">$</span>
+      <input id="q" type="text" placeholder="type your question and hit enter..." autocomplete="off">
+      <button type="submit" id="send-btn">RUN</button>
+    </form>
+  </footer>
+
+  <script>
+    // ============================================================
+    // Put your Gemini API key here (get a fresh one at
+    // https://aistudio.google.com/apikey — revoke any key that's
+    // ever been shared or committed anywhere).
+    // Since this is a plain static page, the key ships in the
+    // page source. That's fine for a personal/portfolio site with
+    // light traffic; if this gets serious public traffic, move the
+    // call behind a small backend instead.
+    // ============================================================
+    const GEMINI_API_KEY = "PASTE_YOUR_NEW_GEMINI_API_KEY_HERE";
+
+    const thread = document.getElementById('thread');
+    const emptyMsg = document.getElementById('empty-msg');
+    const form = document.getElementById('ask-form');
+    const input = document.getElementById('q');
+    const sendBtn = document.getElementById('send-btn');
+
+    let history = [];
+
+    function addLine(role, text) {
+      if (emptyMsg) emptyMsg.remove();
+      const div = document.createElement('div');
+      div.className = role === 'user' ? 'line-user' : role === 'error' ? 'line-error' : 'line-ai';
+      const promptText = role === 'user' ? 'user@aadarsh:~$' : role === 'error' ? '[error]' : 'aadarsh_ai>';
+      div.innerHTML = `<span class="prompt">${promptText}</span>`;
+      const span = document.createElement('span');
+      span.textContent = text;
+      div.appendChild(span);
+      thread.appendChild(div);
+      window.scrollTo({ top: document.body.scrollHeight });
+      return div;
+    }
+
+    async function askGemini() {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': "AQ.Ab8RN6KSsu4HUm3ke9lFz-FLR_dkTqs_gTVRlv-T1qOpmVQ1wg",
+    },
+    body: JSON.stringify({
+          contents: history.map(m => ({
+            role: m.role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: m.text }]
+          }))
+        })
+      });
+      if (!res.ok) {
+        let detail = '';
+        try { detail = (await res.json())?.error?.message || ''; } catch {}
+        throw new Error(detail || `request failed (${res.status})`);
+      }
+      const data = await res.json();
+      const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
+      if (!text) throw new Error('no response — it may have been blocked.');
+      return text;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const question = input.value.trim();
+      if (!question) return;
+
+      if (!GEMINI_API_KEY || GEMINI_API_KEY === 'AQ.Ab8RN6IBEu07gKQDa0jEEis2xMU5Hp2ewvSUjje1Aud6cKaNfQ') {
+        addLine('user', question);
+        addLine('error', 'no api key configured — edit GEMINI_API_KEY at the top of this file.');
+        input.value = '';
+        return;
+      }
+
+      addLine('user', question);
+      history.push({ role: 'user', text: question });
+      input.value = '';
+      sendBtn.disabled = true;
+      const thinking = addLine('ai', 'processing request...');
+      thinking.classList.add('thinking');
+
+      try {
+        const answer = await askGemini();
+        thinking.remove();
+        addLine('assistant', answer);
+        history.push({ role: 'assistant', text: answer });
+      } catch (err) {
+        thinking.remove();
+        addLine('error', err.message || 'something went wrong.');
+        history = history.filter(m => m.text !== question);
+      } finally {
+        sendBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
