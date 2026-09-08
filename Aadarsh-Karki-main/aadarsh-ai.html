@@ -166,6 +166,7 @@
   </footer>
 
   <script>
+<<<<<<< HEAD
     // ============================================================
     // Put your Gemini API key here (get a fresh one at
     // https://aistudio.google.com/apikey — revoke any key that's
@@ -176,87 +177,109 @@
     // call behind a small backend instead.
     // ============================================================
     const GEMINI_API_KEY = "AQ.Ab8RN6LUiuItbUwwQBR5Ywz_j5_K2s7SzB1c2LPC-VNkYPNWeA";
+=======
+ // ============================================================
+// Put your Groq API key here. Get one at:
+// https://console.groq.com/keys
+// It will look like: gsk_xxxxxxxxxxxxxxxxxxxxxxxx
+// Since this is a plain static page, the key ships in the
+// page source, visible to anyone who views it. Set rate limits
+// on your Groq account so a leaked key can't run up abuse.
+// ============================================================
+const GROQ_API_KEY = "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";
+const GROQ_MODEL = "openai/gpt-oss-20b";
+>>>>>>> 08c8af0 (yo)
 
-    const thread = document.getElementById('thread');
-    const emptyMsg = document.getElementById('empty-msg');
-    const form = document.getElementById('ask-form');
-    const input = document.getElementById('q');
-    const sendBtn = document.getElementById('send-btn');
+const thread = document.getElementById('thread');
+const emptyMsg = document.getElementById('empty-msg');
+const form = document.getElementById('ask-form');
+const input = document.getElementById('q');
+const sendBtn = document.getElementById('send-btn');
 
-    let history = [];
+let history = [];
 
-    function addLine(role, text) {
-      if (emptyMsg) emptyMsg.remove();
-      const div = document.createElement('div');
-      div.className = role === 'user' ? 'line-user' : role === 'error' ? 'line-error' : 'line-ai';
-      const promptText = role === 'user' ? 'user@aadarsh:~$' : role === 'error' ? '[error]' : 'aadarsh_ai>';
-      div.innerHTML = `<span class="prompt">${promptText}</span>`;
-      const span = document.createElement('span');
-      span.textContent = text;
-      div.appendChild(span);
-      thread.appendChild(div);
-      window.scrollTo({ top: document.body.scrollHeight });
-      return div;
-    }
+function addLine(role, text) {
+  if (emptyMsg) emptyMsg.remove();
+  const div = document.createElement('div');
+  div.className = role === 'user' ? 'line-user' : role === 'error' ? 'line-error' : 'line-ai';
+  const promptText = role === 'user' ? 'user@aadarsh:~$' : role === 'error' ? '[error]' : 'aadarsh_ai>';
+  div.innerHTML = `<span class="prompt">${promptText}</span>`;
+  const span = document.createElement('span');
+  span.textContent = text;
+  div.appendChild(span);
+  thread.appendChild(div);
+  window.scrollTo({ top: document.body.scrollHeight });
+  return div;
+}
 
-    async function askGemini() {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent`;
-  const res = await fetch(url, {
+async function askGroq() {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+<<<<<<< HEAD
       'x-goog-api-key': "AQ.Ab8RN6LUiuItbUwwQBR5Ywz_j5_K2s7SzB1c2LPC-VNkYPNWeA",
+=======
+      'Authorization': `Bearer ${GROQ_API_KEY}`
+>>>>>>> 08c8af0 (yo)
     },
     body: JSON.stringify({
-          contents: history.map(m => ({
-            role: m.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: m.text }]
-          }))
-        })
-      });
-      if (!res.ok) {
-        let detail = '';
-        try { detail = (await res.json())?.error?.message || ''; } catch {}
-        throw new Error(detail || `request failed (${res.status})`);
-      }
-      const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
-      if (!text) throw new Error('no response — it may have been blocked.');
-      return text;
-    }
+      model: GROQ_MODEL,
+      messages: [{ 
+          role: 'system', 
+          content: 'Your name is Aadarsh AI. You are a helpful AI assistant running in a terminal interface.' 
+        }, ... history.map(m => ({
+        role: m.role === 'assistant' ? 'assistant' : 'user',
+        content: m.text
+      }))
+    ]
+    })
+  });
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const question = input.value.trim();
-      if (!question) return;
+  if (!res.ok) {
+    let detail = '';
+    try { detail = (await res.json())?.error?.message || ''; } catch {}
+    throw new Error(detail || `request failed (${res.status})`);
+  }
 
-      if (!GEMINI_API_KEY || GEMINI_API_KEY === 'AQ.Ab8RN6IBEu07gKQDa0jEEis2xMU5Hp2ewvSUjje1Aud6cKaNfQ') {
-        addLine('user', question);
-        addLine('error', 'no api key configured — edit GEMINI_API_KEY at the top of this file.');
-        input.value = '';
-        return;
-      }
+  const data = await res.json();
+  const text = data?.choices?.[0]?.message?.content || '';
+  if (!text) throw new Error('no response — it may have been blocked.');
+  return text;
+}
 
-      addLine('user', question);
-      history.push({ role: 'user', text: question });
-      input.value = '';
-      sendBtn.disabled = true;
-      const thinking = addLine('ai', 'processing request...');
-      thinking.classList.add('thinking');
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const question = input.value.trim();
+  if (!question) return;
 
-      try {
-        const answer = await askGemini();
-        thinking.remove();
-        addLine('assistant', answer);
-        history.push({ role: 'assistant', text: answer });
-      } catch (err) {
-        thinking.remove();
-        addLine('error', err.message || 'something went wrong.');
-        history = history.filter(m => m.text !== question);
-      } finally {
-        sendBtn.disabled = false;
-      }
-    });
+  if (!GROQ_API_KEY || GROQ_API_KEY === 'PASTE_YOUR_GROQ_API_KEY_HERE') {
+    addLine('user', question);
+    addLine('error', 'no api key configured — edit GROQ_API_KEY at the top of this file.');
+    input.value = '';
+    return;
+  }
+
+  addLine('user', question);
+  history.push({ role: 'user', text: question });
+  input.value = '';
+  sendBtn.disabled = true;
+  const thinking = addLine('ai', 'processing request...');
+  thinking.classList.add('thinking');
+
+  try {
+    const answer = await askGroq();
+    thinking.remove();
+    addLine('assistant', answer);
+    history.push({ role: 'assistant', text: answer });
+  } catch (err) {
+    thinking.remove();
+    addLine('error', err.message || 'something went wrong.');
+    history = history.filter(m => m.text !== question);
+  } finally {
+    sendBtn.disabled = false;
+  }
+});
   </script>
 </body>
 </html>
