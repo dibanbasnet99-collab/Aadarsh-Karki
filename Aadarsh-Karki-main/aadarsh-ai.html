@@ -166,18 +166,6 @@
   </footer>
 
   <script>
-<<<<<<< HEAD
-    // ============================================================
-    // Put your Gemini API key here (get a fresh one at
-    // https://aistudio.google.com/apikey — revoke any key that's
-    // ever been shared or committed anywhere).
-    // Since this is a plain static page, the key ships in the
-    // page source. That's fine for a personal/portfolio site with
-    // light traffic; if this gets serious public traffic, move the
-    // call behind a small backend instead.
-    // ============================================================
-    const GEMINI_API_KEY = "AQ.Ab8RN6LUiuItbUwwQBR5Ywz_j5_K2s7SzB1c2LPC-VNkYPNWeA";
-=======
  // ============================================================
 // Put your Groq API key here. Get one at:
 // https://console.groq.com/keys
@@ -188,7 +176,6 @@
 // ============================================================
 const GROQ_API_KEY = "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";
 const GROQ_MODEL = "openai/gpt-oss-20b";
->>>>>>> 08c8af0 (yo)
 
 const thread = document.getElementById('thread');
 const emptyMsg = document.getElementById('empty-msg');
@@ -217,11 +204,7 @@ async function askGroq() {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-<<<<<<< HEAD
-      'x-goog-api-key': "AQ.Ab8RN6LUiuItbUwwQBR5Ywz_j5_K2s7SzB1c2LPC-VNkYPNWeA",
-=======
       'Authorization': `Bearer ${GROQ_API_KEY}`
->>>>>>> 08c8af0 (yo)
     },
     body: JSON.stringify({
       model: GROQ_MODEL,
