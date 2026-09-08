@@ -1,0 +1,2896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aadash Karki // Cyber Portfolio & Matrix Terminal</title>
+  
+  <!-- Google Fonts: Monospace Cyber Fonts & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* ==========================================================================
+       CYBER / MATRIX / HACKER THEME SYSTEM
+       ========================================================================== */
+    :root {
+      --bg-dark: #000b00;
+      --bg-darker: #020803;
+      --bg-card: rgba(2, 20, 7, 0.85);
+      --bg-card-hover: rgba(0, 35, 12, 0.92);
+      --border-color: rgba(0, 255, 102, 0.25);
+      --border-glow: rgba(0, 255, 102, 0.6);
+      --accent-neon: #00FF66;
+      --accent-bright: #00FF41;
+      --accent-glow: rgba(0, 255, 102, 0.4);
+      --text-main: #e0ffe8;
+      --text-muted: #4dab6e;
+      --text-dim: #007a2f;
+      --font-mono: 'Share Tech Mono', 'Fira Code', 'JetBrains Mono', monospace;
+      --scanline-opacity: 0.15;
+    }
+
+    /* Theme Color Variations */
+    body.theme-cyan {
+      --accent-neon: #00F3FF;
+      --accent-bright: #00D8FF;
+      --accent-glow: rgba(0, 243, 255, 0.4);
+      --border-color: rgba(0, 243, 255, 0.25);
+      --text-main: #e0faff;
+      --text-muted: #4db3ab;
+    }
+
+    body.theme-amber {
+      --accent-neon: #FFB000;
+      --accent-bright: #FF8C00;
+      --accent-glow: rgba(255, 176, 0, 0.4);
+      --border-color: rgba(255, 176, 0, 0.25);
+      --text-main: #fffbe0;
+      --text-muted: #ab9b4d;
+    }
+
+    body.theme-red {
+      --accent-neon: #FF0055;
+      --accent-bright: #FF0033;
+      --accent-glow: rgba(255, 0, 85, 0.4);
+      --border-color: rgba(255, 0, 85, 0.25);
+      --text-main: #ffe0e8;
+      --text-muted: #ab4d6e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent-neon) var(--bg-darker);
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-darker);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--text-dim);
+      border-radius: 2px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-neon);
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      overflow-x: hidden;
+      line-height: 1.5;
+      font-size: 15px;
+    }
+
+    @keyframes circleTickPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); border-color: #10b981; box-shadow: 0 0 25px rgba(16, 185, 129, 0.6); }
+      100% { transform: scale(1); }
+    }
+    .circle-tick-pulse {
+      animation: circleTickPulse 0.45s ease-out;
+    }
+
+    /* ==========================================================================
+       CANVAS & CRT SCANLINE OVERLAY
+       ========================================================================== */
+    #matrix-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .dark-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(0, 11, 0, 0.65) 0%, rgba(1, 8, 2, 0.92) 80%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .scanlines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 99;
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.25) 50%
+      ), linear-gradient(
+        90deg,
+        rgba(255, 0, 0, 0.03),
+        rgba(0, 255, 0, 0.01),
+        rgba(0, 0, 255, 0.03)
+      );
+      background-size: 100% 3px, 6px 100%;
+      opacity: var(--scanline-opacity);
+    }
+
+    /* ==========================================================================
+       APP CONTAINER & LAYOUT
+       ========================================================================== */
+    .app-container {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 24px 80px 24px;
+    }
+
+    /* Nav Bar */
+    .nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: rgba(2, 16, 6, 0.85);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 0 15px rgba(0, 255, 102, 0.08);
+      backdrop-filter: blur(8px);
+      margin-bottom: 28px;
+      border-radius: 4px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      color: var(--accent-neon);
+      text-shadow: 0 0 8px var(--accent-glow);
+      letter-spacing: 1px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-neon);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-neon);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(0.8); }
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      transition: all 0.2s ease;
+      padding: 4px 8px;
+      border: 1px solid transparent;
+      border-radius: 2px;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--accent-neon);
+      border-color: var(--border-color);
+      background: rgba(0, 255, 102, 0.06);
+      text-shadow: 0 0 5px var(--accent-glow);
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-icon {
+      background: rgba(0, 20, 5, 0.6);
+      border: 1px solid var(--border-color);
+      color: var(--accent-neon);
+      padding: 4px 10px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-icon:hover {
+      border-color: var(--accent-neon);
+      box-shadow: 0 0 10px var(--accent-glow);
+      background: rgba(0, 255, 102, 0.12);
+    }
+
+    /* ==========================================================================
+       PAGE B & TIME MACHINE STYLING
+       ========================================================================== */
+    .page-view {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .time-machine-console {
+      background: rgba(1, 15, 5, 0.92);
+      border: 1px solid var(--accent-neon);
+      box-shadow: 0 0 25px rgba(0, 255, 102, 0.15), inset 0 0 15px rgba(0, 255, 102, 0.05);
+      border-radius: 4px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+
+    .time-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 10px;
+      border-radius: 5px;
+      background: rgba(0, 40, 15, 0.9);
+      outline: none;
+      border: 1px solid var(--border-color);
+      margin: 16px 0;
+    }
+
+    .time-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--accent-neon);
+      cursor: pointer;
+      box-shadow: 0 0 12px var(--accent-neon);
+      border: 2px solid #000;
+      transition: transform 0.15s ease;
+    }
+
+    .time-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.25);
+    }
+
+    .year-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .year-pill {
+      background: rgba(0, 25, 8, 0.8);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      transition: all 0.2s;
+    }
+
+    .year-pill.active, .year-pill:hover {
+      background: rgba(0, 255, 102, 0.2);
+      border-color: var(--accent-neon);
+      color: var(--accent-neon);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .time-hud-display {
+      background: rgba(0, 10, 3, 0.95);
+      border: 1px solid var(--border-color);
+      padding: 20px;
+      border-radius: 4px;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 20px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .time-hud-display {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .timeline-node-card {
+      background: rgba(0, 20, 6, 0.85);
+      border-left: 3px solid var(--accent-neon);
+      border-top: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px;
+      margin-bottom: 16px;
+      border-radius: 0 4px 4px 0;
+      transition: all 0.25s;
+    }
+
+    .timeline-node-card:hover {
+      background: rgba(0, 30, 10, 0.95);
+      box-shadow: 0 0 15px rgba(0, 255, 102, 0.12);
+      transform: translateX(4px);
+    }
+
+    /* Section Component Frames */
+    .cyber-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 255, 102, 0.02);
+      backdrop-filter: blur(10px);
+      border-radius: 4px;
+      padding: 24px;
+      margin-bottom: 32px;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .cyber-card:hover {
+      border-color: rgba(0, 255, 102, 0.45);
+      box-shadow: 0 0 20px rgba(0, 255, 102, 0.12);
+    }
+
+    /* Terminal Window Header Bar */
+    .terminal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 25, 8, 0.9);
+      border-bottom: 1px solid var(--border-color);
+      padding: 8px 14px;
+      margin: -24px -24px 20px -24px;
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .terminal-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .terminal-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--text-dim);
+    }
+    .dot-close { background: #ff5f56; }
+    .dot-min { background: #ffbd2e; }
+    .dot-max { background: #27c93f; }
+
+    .section-title {
+      color: var(--accent-neon);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-shadow: 0 0 8px var(--accent-glow);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ==========================================================================
+       HERO HEADER SECTION
+       ========================================================================== */
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 32px;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+        justify-items: center;
+      }
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 180px;
+      height: 180px;
+    }
+
+    .avatar-frame {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2px solid var(--accent-neon);
+      box-shadow: 0 0 25px var(--accent-glow), inset 0 0 15px var(--accent-glow);
+      overflow: hidden;
+      position: relative;
+      background: #021205;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .avatar-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: contrast(1.15) brightness(0.95);
+    }
+
+    .avatar-radar {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 1px dashed var(--accent-neon);
+      opacity: 0.4;
+      animation: rotateRadar 12s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes rotateRadar {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Glitch Title Animation */
+    .glitch-text {
+      position: relative;
+      font-size: 38px;
+      font-weight: 700;
+      color: var(--accent-neon);
+      letter-spacing: 2px;
+      text-shadow: 0 0 12px var(--accent-glow);
+      display: inline-block;
+    }
+
+    .glitch-text::before,
+    .glitch-text::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      clip: rect(0, 0, 0, 0);
+    }
+
+    .glitch-text::before {
+      left: -2px;
+      text-shadow: 2px 0 #ff0055;
+      animation: glitch-anim-1 2.5s infinite linear alternate-reverse;
+    }
+
+    .glitch-text::after {
+      left: 2px;
+      text-shadow: -2px 0 #00f3ff;
+      animation: glitch-anim-2 2s infinite linear alternate-reverse;
+    }
+
+    @keyframes glitch-anim-1 {
+      0% { clip: rect(20px, 9999px, 15px, 0); }
+      20% { clip: rect(42px, 9999px, 80px, 0); }
+      40% { clip: rect(10px, 9999px, 85px, 0); }
+      60% { clip: rect(50px, 9999px, 20px, 0); }
+      80% { clip: rect(75px, 9999px, 40px, 0); }
+      100% { clip: rect(5px, 9999px, 60px, 0); }
+    }
+
+    @keyframes glitch-anim-2 {
+      0% { clip: rect(65px, 9999px, 100px, 0); }
+      20% { clip: rect(12px, 9999px, 30px, 0); }
+      40% { clip: rect(80px, 9999px, 5px, 0); }
+      60% { clip: rect(25px, 9999px, 55px, 0); }
+      80% { clip: rect(40px, 9999px, 90px, 0); }
+      100% { clip: rect(95px, 9999px, 15px, 0); }
+    }
+
+    .hero-subtitle {
+      color: var(--text-main);
+      font-size: 17px;
+      margin: 10px 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .typing-cursor {
+      display: inline-block;
+      width: 9px;
+      height: 18px;
+      background-color: var(--accent-neon);
+      margin-left: 2px;
+      animation: blink 0.9s infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .hero-tags {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .cyber-badge {
+      background: rgba(0, 255, 102, 0.08);
+      border: 1px solid var(--border-color);
+      color: var(--accent-neon);
+      padding: 3px 10px;
+      border-radius: 2px;
+      font-size: 12px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: rgba(0, 255, 102, 0.15);
+      border: 1px solid var(--accent-neon);
+      color: var(--accent-neon);
+      padding: 8px 18px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: all 0.25s ease;
+      text-shadow: 0 0 5px var(--accent-glow);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-neon);
+      color: #000;
+      box-shadow: 0 0 20px var(--accent-glow);
+      text-shadow: none;
+      transform: translateY(-2px);
+    }
+
+    /* ==========================================================================
+       REAL-TIME "TIME SPENT ON EARTH" COUNTER
+       ========================================================================== */
+    .counter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .counter-card {
+      background: rgba(0, 15, 5, 0.8);
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      border-radius: 3px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .counter-card:hover {
+      border-color: var(--accent-neon);
+      background: rgba(0, 30, 10, 0.9);
+      box-shadow: 0 0 15px rgba(0, 255, 102, 0.15);
+    }
+
+    .counter-val {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--accent-neon);
+      text-shadow: 0 0 10px var(--accent-glow);
+      margin: 4px 0;
+      font-family: 'Fira Code', monospace;
+    }
+
+    .counter-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .life-progress-bar-container {
+      margin-top: 24px;
+      background: rgba(0, 20, 5, 0.6);
+      border: 1px solid var(--border-color);
+      padding: 12px 16px;
+      border-radius: 3px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 12px;
+      background: rgba(0, 40, 15, 0.8);
+      border: 1px solid var(--border-color);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 8px;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--text-dim) 0%, var(--accent-neon) 100%);
+      box-shadow: 0 0 10px var(--accent-neon);
+      width: 14%; /* 14 years / 100 benchmark */
+      transition: width 1s linear;
+    }
+
+    /* ==========================================================================
+       ABOUT & BIO TERMINAL
+       ========================================================================== */
+    .bio-content {
+      background: rgba(0, 10, 3, 0.95);
+      padding: 18px;
+      border-radius: 3px;
+      border: 1px solid rgba(0, 255, 102, 0.15);
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .terminal-cmd {
+      color: var(--accent-bright);
+      font-weight: bold;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .bio-line {
+      margin-bottom: 6px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .bio-key {
+      color: var(--text-muted);
+      min-width: 110px;
+    }
+
+    .bio-val {
+      color: var(--text-main);
+    }
+
+    /* ==========================================================================
+       SKILLS TERMINAL
+       ========================================================================== */
+    .skills-filter {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: rgba(0, 20, 5, 0.6);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 5px 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+
+    .filter-btn.active, .filter-btn:hover {
+      background: rgba(0, 255, 102, 0.15);
+      border-color: var(--accent-neon);
+      color: var(--accent-neon);
+    }
+
+    .skills-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .skill-chip {
+      background: rgba(0, 25, 8, 0.85);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 16px;
+      border-radius: 3px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .skill-chip:hover {
+      border-color: var(--accent-neon);
+      background: rgba(0, 255, 102, 0.15);
+      color: var(--accent-neon);
+      box-shadow: 0 0 15px var(--accent-glow);
+      transform: translateY(-2px);
+    }
+
+    .skill-icon {
+      color: var(--accent-neon);
+      font-weight: bold;
+    }
+
+    /* ==========================================================================
+       PROJECTS SECTION
+       ========================================================================== */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .project-card {
+      background: rgba(1, 18, 6, 0.85);
+      border: 1px solid var(--border-color);
+      padding: 20px;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .project-card:hover {
+      border-color: var(--accent-neon);
+      box-shadow: 0 0 20px rgba(0, 255, 102, 0.18);
+      transform: translateY(-4px);
+      background: rgba(0, 30, 10, 0.95);
+    }
+
+    .project-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--accent-neon);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .project-desc {
+      color: var(--text-main);
+      font-size: 13.5px;
+      margin-bottom: 16px;
+      line-height: 1.6;
+      opacity: 0.9;
+    }
+
+    .project-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .project-tag {
+      font-size: 11px;
+      color: var(--text-muted);
+      background: rgba(0, 255, 102, 0.06);
+      border: 1px solid rgba(0, 255, 102, 0.2);
+      padding: 2px 8px;
+      border-radius: 2px;
+    }
+
+    .project-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-code {
+      background: rgba(0, 20, 5, 0.8);
+      border: 1px solid var(--border-color);
+      color: var(--accent-neon);
+      padding: 6px 14px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.2s;
+      width: 100%;
+      text-align: center;
+    }
+
+    .btn-code:hover {
+      background: var(--accent-neon);
+      color: #000;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    /* ==========================================================================
+       CONTACT FORM & TERMINAL LOGS
+       ========================================================================== */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .cyber-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .form-input, .form-textarea {
+      background: rgba(0, 15, 4, 0.9);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 14px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      border-radius: 3px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+      border-color: var(--accent-neon);
+      box-shadow: 0 0 12px var(--accent-glow);
+      background: rgba(0, 25, 8, 0.95);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 110px;
+    }
+
+    .log-window {
+      background: rgba(0, 8, 2, 0.95);
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      padding: 14px;
+      font-size: 12px;
+      height: 100%;
+      min-height: 220px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .log-item {
+      color: var(--text-muted);
+      word-break: break-word;
+    }
+    .log-item.success {
+      color: var(--accent-neon);
+    }
+    .log-item.info {
+      color: #00f3ff;
+    }
+
+    /* ==========================================================================
+       FOOTER & MODALS
+       ========================================================================== */
+    .footer {
+      border-top: 1px solid var(--border-color);
+      padding-top: 20px;
+      margin-top: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .footer-status {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Terminal Modal CLI */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .terminal-modal {
+      width: 100%;
+      max-width: 800px;
+      height: 520px;
+      background: rgba(0, 10, 3, 0.96);
+      border: 1px solid var(--accent-neon);
+      box-shadow: 0 0 35px var(--accent-glow);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .terminal-modal-body {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      font-size: 13.5px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .cli-input-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 20, 5, 0.8);
+      border-top: 1px solid var(--border-color);
+      padding: 10px 16px;
+    }
+
+    .cli-prompt {
+      color: var(--accent-bright);
+      font-weight: bold;
+    }
+
+    .cli-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MATRIX DIGITAL RAIN CANVAS -->
+  <canvas id="matrix-canvas"></canvas>
+  <div class="dark-overlay"></div>
+  <div id="scanlines" class="scanlines"></div>
+
+  <!-- MAIN APPLICATION CONTENT -->
+  <div class="app-container">
+
+    <!-- NAV BAR -->
+    <header class="nav-bar">
+      <div class="nav-brand">
+        <div class="pulse-dot"></div>
+        <span>AADASH_KARKI // NODE_JHAPA-7</span>
+      </div>
+
+      <nav class="nav-links">
+        <a href="#portfolio" class="nav-link" onclick="switchPage('a')">[ PORTFOLIO ]</a>
+        <a href="#know-about-me" class="nav-link" onclick="switchPage('b')" style="color: var(--accent-neon); font-weight: bold; text-shadow: 0 0 6px var(--accent-glow);">[ ⏳ KNOW ABOUT ME ]</a>
+        <a href="#runtime" class="nav-link" onclick="switchPage('a')">[ TELEMETRY ]</a>
+        <a href="#skills" class="nav-link" onclick="switchPage('a')">[ TECH_STACK ]</a>
+        <a href="#projects" class="nav-link" onclick="switchPage('a')">[ PROJECTS ]</a>
+        <a href="#contact" class="nav-link" onclick="switchPage('a')">[ TRANSMIT ]</a>
+      </nav>
+
+      <div class="nav-controls">
+        <button id="btn-sound" class="btn-icon" title="Toggle Sound Synthesis">
+          <span>🔊 AUDIO: <span id="sound-status">ON</span></span>
+        </button>
+        <button id="btn-theme" class="btn-icon" title="Cycle Accent Color">
+          <span>🟢 MATRIX</span>
+        </button>
+        <button id="btn-cli-open" class="btn-icon" title="Launch Interactive Terminal CLI">
+          <span>💻 CLI</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ==========================================================================
+         PAGE A: PORTFOLIO MAIN VIEW
+         ========================================================================== -->
+    <div id="page-a" class="page-view">
+      <!-- HERO HEADER SECTION -->
+      <section class="cyber-card" id="hero">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="terminal-dot dot-close"></span>
+          <span class="terminal-dot dot-min"></span>
+          <span class="terminal-dot dot-max"></span>
+        </div>
+        <span>user@nepal-node:~ /identity_profile</span>
+        <span>STATUS: ACTIVE</span>
+      </div>
+
+      <div class="hero-grid">
+        <!-- AVATAR CONTAINER -->
+        <div class="avatar-wrapper">
+          <div class="avatar-radar"></div>
+          <div class="avatar-frame">
+            <!-- Permanent Aadash Karki Profile Avatar Image -->
+            <img id="profile-img" src="./src/assets/images/aadash_permanent_photo_1786191408602.jpg" alt="Aadash Karki Profile Avatar" referrerPolicy="no-referrer">
+          </div>
+        </div>
+
+        <!-- HERO INFO -->
+        <div>
+          <h1 class="glitch-text" data-text="AADASH KARKI">AADASH KARKI</h1>
+          
+          <div class="hero-subtitle">
+            <span style="color: var(--accent-bright); font-weight: bold;">$ ></span>
+            <span id="typed-subtitle">Cyber Enthusiast & Web Developer | Jhapa-7, Nepal</span>
+            <span class="typing-cursor"></span>
+          </div>
+
+          <div class="hero-tags">
+            <span class="cyber-badge">DOB: 2014-02-27 (Feb 27, 2014)</span>
+            <span class="cyber-badge">LOCATION: JHAPA-7, NEPAL</span>
+            <span class="cyber-badge">ROLE: WEB ARCHITECT & CODER</span>
+            <span class="cyber-badge">ENCRYPTION: AES-256</span>
+          </div>
+
+          <p style="color: var(--text-main); font-size: 14px; margin-bottom: 20px; max-width: 650px; opacity: 0.9;">
+            Building high-performance interactive web experiences, matrix digital graphics, and exploring software development from Jhapa, Nepal.
+          </p>
+
+          <div class="hero-actions">
+            <button class="btn-primary" onclick="switchPage('b')" style="background: var(--accent-neon); color: #000; box-shadow: 0 0 15px var(--accent-glow);">
+              <span>⏳ KNOW ABOUT ME (TIME MACHINE)</span>
+            </button>
+            <button class="btn-primary" onclick="openTerminalModal()">
+              <span>💻 LAUNCH_TERMINAL_CLI</span>
+            </button>
+            <a href="#runtime" class="btn-primary" style="text-decoration: none;">
+              <span>⏱️ LIFE_RUNTIME</span>
+            </a>
+            <a href="https://www.facebook.com/share/1TvJQwimwx/" target="_blank" rel="noopener noreferrer" class="btn-primary" style="text-decoration: none;">
+              <span>🔵 FACEBOOK_PROFILE</span>
+            </a>
+            <a href="#contact" class="btn-primary" style="text-decoration: none;">
+              <span>📡 SEND_PACKET</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REAL-TIME "TIME SPENT ON EARTH" LIVE COUNTER -->
+    <section class="cyber-card" id="runtime">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="terminal-dot dot-close"></span>
+          <span class="terminal-dot dot-min"></span>
+          <span class="terminal-dot dot-max"></span>
+        </div>
+        <span>[ LIFE_RUNTIME_COUNTER // SUBJECT_AADASH ]</span>
+        <span>INTERVAL: 1000ms</span>
+      </div>
+
+      <div class="section-title">
+        <span>⏱️ [ LIFE_RUNTIME_COUNTER ]</span>
+      </div>
+
+      <p style="color: var(--text-muted); font-size: 13px; margin-top: 6px;">
+        Telemetry metrics calculating exact temporal duration spent on planet Earth (Assumed DOB: February 27, 2014 / 2014-02-27).
+      </p>
+
+      <div class="counter-grid">
+        <div class="counter-card">
+          <div class="counter-val" id="cnt-years">14</div>
+          <div class="counter-label">Total Years</div>
+        </div>
+        <div class="counter-card">
+          <div class="counter-val" id="cnt-days">5,113</div>
+          <div class="counter-label">Days Lived</div>
+        </div>
+        <div class="counter-card">
+          <div class="counter-val" id="cnt-hours">122,712</div>
+          <div class="counter-label">Hours Elapsed</div>
+        </div>
+        <div class="counter-card">
+          <div class="counter-val" id="cnt-minutes">7,362,720</div>
+          <div class="counter-label">Minutes Lived</div>
+        </div>
+        <div class="counter-card">
+          <div class="counter-val" id="cnt-seconds">441,763,200</div>
+          <div class="counter-label">Seconds Live</div>
+        </div>
+        <div class="counter-card">
+          <div class="counter-val" id="cnt-space">13.82B</div>
+          <div class="counter-label">Earth Orbit (km)</div>
+        </div>
+      </div>
+
+      <div class="life-progress-bar-container">
+        <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
+          <span>LIFE_RUNTIME_LEVEL: 14 YRS</span>
+          <span>SYSTEM_BENCHMARK: LEVEL 100</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="life-progress-fill"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TERMINAL ABOUT ME / BIO -->
+    <section class="cyber-card" id="about">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="terminal-dot dot-close"></span>
+          <span class="terminal-dot dot-min"></span>
+          <span class="terminal-dot dot-max"></span>
+        </div>
+        <span>bash - 80x24 - $ cat bio.txt</span>
+        <span>UTF-8</span>
+      </div>
+
+      <div class="section-title" style="margin-bottom: 16px;">
+        <span>📄 [ ABOUT_ME // BIO.TXT ]</span>
+      </div>
+
+      <div class="bio-content">
+        <span class="terminal-cmd">$ cat bio.txt</span>
+        
+        <div class="bio-line">
+          <span class="bio-key">[ NAME ]:</span>
+          <span class="bio-val">Aadash Karki</span>
+        </div>
+        <div class="bio-line">
+          <span class="bio-key">[ DOB ]:</span>
+          <span class="bio-val">February 27, 2014 (2014-02-27)</span>
+        </div>
+        <div class="bio-line">
+          <span class="bio-key">[ SCHOOL ]:</span>
+          <span class="bio-val">Siddhartha Boarding Secondary School (Class 7)</span>
+        </div>
+        <div class="bio-line">
+          <span class="bio-key">[ LOCATION ]:</span>
+          <span class="bio-val">Jhapa-7, Jhapa District, Koshi Province, Nepal</span>
+        </div>
+        <div class="bio-line">
+          <span class="bio-key">[ BIOGRAPHY ]:</span>
+          <span class="bio-val">Class 7 student at Siddhartha Boarding Secondary School, coder, and digital explorer based in Jhapa-7. Passionate about cyber aesthetics, web development, and building interactive web experiences.</span>
+        </div>
+        <div class="bio-line">
+          <span class="bio-key">[ INTERESTS ]:</span>
+          <span class="bio-val">Web Engineering, Matrix Graphics, Python Tools, Linux CLI, Retro Interfaces, Cyber Security Basics.</span>
+        </div>
+        <div class="bio-line">
+          <span class="bio-key">[ MISSION ]:</span>
+          <span class="bio-val">Continuous learning, building open-source projects, and connecting with global tech creators.</span>
+        </div>
+        <div style="margin-top: 16px;">
+          <button class="btn-primary" onclick="switchPage('b')">
+            <span>⏳ ENTER TIME MACHINE & STORY (PAGE B)</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE SKILLS TERMINAL -->
+    <section class="cyber-card" id="skills">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="terminal-dot dot-close"></span>
+          <span class="terminal-dot dot-min"></span>
+          <span class="terminal-dot dot-max"></span>
+        </div>
+        <span>[ TECH_STACK // INTERACTIVE_NODES ]</span>
+        <span>COUNT: 10</span>
+      </div>
+
+      <div class="section-title" style="margin-bottom: 16px;">
+        <span>🛠️ [ TECH_STACK // SKILL_MATRIX ]</span>
+      </div>
+
+      <div class="skills-filter">
+        <button class="filter-btn active" onclick="filterSkills('all', this)">[ ALL_MODULES ]</button>
+        <button class="filter-btn" onclick="filterSkills('frontend', this)">[ FRONTEND ]</button>
+        <button class="filter-btn" onclick="filterSkills('tools', this)">[ TOOLS & CLI ]</button>
+        <button class="filter-btn" onclick="filterSkills('core', this)">[ CORE LOGIC ]</button>
+      </div>
+
+      <div class="skills-grid" id="skills-container">
+        <!-- Skill Chips populated by JS or rendered inline -->
+        <div class="skill-chip" data-cat="frontend" onclick="inspectSkill('HTML5', '95%', 'Semantic structuring, modern DOM APIs, canvas graphics', 'div, canvas, audio')">
+          <span class="skill-icon">&lt;/&gt;</span>
+          <span>HTML5 & Canvas 2D</span>
+        </div>
+
+        <div class="skill-chip" data-cat="frontend" onclick="inspectSkill('CSS3 & Glassmorphism', '90%', 'Tailwind CSS, Flexbox/Grid, Animations, Cyber Themes', 'backdrop-filter, animations')">
+          <span class="skill-icon">🎨</span>
+          <span>CSS3 / Cyber Styling</span>
+        </div>
+
+        <div class="skill-chip" data-cat="frontend" onclick="inspectSkill('JavaScript ES6+', '88%', 'Async/Await, DOM manipulation, Web Audio, Event Listeners', 'Promises, Web APIs')">
+          <span class="skill-icon">⚡</span>
+          <span>JavaScript (Vanilla)</span>
+        </div>
+
+        <div class="skill-chip" data-cat="core" onclick="inspectSkill('Python 3', '82%', 'Automation scripts, data parsing, logic algorithms', 'import sys, os')">
+          <span class="skill-icon">🐍</span>
+          <span>Python 3</span>
+        </div>
+
+        <div class="skill-chip" data-cat="tools" onclick="inspectSkill('Git & GitHub', '85%', 'Repository management, branching, open-source deployment', 'git commit, push')">
+          <span class="skill-icon">📦</span>
+          <span>Git & Version Control</span>
+        </div>
+
+        <div class="skill-chip" data-cat="tools" onclick="inspectSkill('Linux CLI & Bash', '80%', 'Terminal shell navigation, scripting, system monitoring', 'bash, grep, ssh')">
+          <span class="skill-icon">🐧</span>
+          <span>Linux Terminal CLI</span>
+        </div>
+
+        <div class="skill-chip" data-cat="frontend" onclick="inspectSkill('Cyber & Matrix UI', '92%', 'Glitch VFX, CRT scanlines, matrix rain canvas, retro UX', 'HTML5 Canvas, Glitch CSS')">
+          <span class="skill-icon">❇️</span>
+          <span>Cyber & Matrix UI</span>
+        </div>
+
+        <div class="skill-chip" data-cat="frontend" onclick="inspectSkill('Web Audio API', '78%', 'Real-time sound synthesis, retro bleeps, audio graphs', 'AudioContext, Oscillators')">
+          <span class="skill-icon">🔊</span>
+          <span>Web Audio API</span>
+        </div>
+
+        <div class="skill-chip" data-cat="core" onclick="inspectSkill('React Basics', '75%', 'Component architecture, state hooks, props, Vite', 'useState, useEffect')">
+          <span class="skill-icon">⚛️</span>
+          <span>React.js Basics</span>
+        </div>
+
+        <div class="skill-chip" data-cat="tools" onclick="inspectSkill('Network & Cyber Basics', '80%', 'Packet mechanics, HTTP status, encryption awareness', 'AES-256, TCP/IP')">
+          <span class="skill-icon">🔐</span>
+          <span>Cyber Security Basics</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS SECTION -->
+    <section class="cyber-card" id="projects">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="terminal-dot dot-close"></span>
+          <span class="terminal-dot dot-min"></span>
+          <span class="terminal-dot dot-max"></span>
+        </div>
+        <span>[ PROJECTS_PORTFOLIO // DEPLOYED_NODES ]</span>
+        <span>TOTAL: 3</span>
+      </div>
+
+      <div class="section-title" style="margin-bottom: 20px;">
+        <span>🚀 [ DEPLOYED_PROJECTS ]</span>
+      </div>
+
+      <div class="projects-grid">
+        <!-- PROJECT 1 -->
+        <div class="project-card">
+          <div>
+            <div class="project-title">
+              <span>Matrix Rain Engine v2.0</span>
+              <span style="font-size: 11px; color: var(--accent-neon);">[ LIVE ]</span>
+            </div>
+            <p class="project-desc">
+              High-performance HTML5 Canvas digital rain generator featuring configurable drop speeds, character sets (Binary, Katakana, Hex), and mouse interaction repulsion.
+            </p>
+            <div class="project-tags">
+              <span class="project-tag">JavaScript</span>
+              <span class="project-tag">HTML5 Canvas</span>
+              <span class="project-tag">VFX</span>
+            </div>
+          </div>
+          <div class="project-actions">
+            <button class="btn-code" onclick="runProjectDemo('Matrix Rain Engine v2.0', 'Matrix Digital Rain Canvas initialized.\n[INFO] Canvas Resolution: 100%\n[INFO] Characters/Col: Katakana + Hex\n[INFO] Rendering at 60 FPS smoothly.')">
+              $ ./run_demo.sh
+            </button>
+          </div>
+        </div>
+
+        <!-- PROJECT 2 -->
+        <div class="project-card">
+          <div>
+            <div class="project-title">
+              <span>Cyber Shell Terminal CLI</span>
+              <span style="font-size: 11px; color: var(--accent-neon);">[ LIVE ]</span>
+            </div>
+            <p class="project-desc">
+              Lightweight in-browser hacker command prompt supporting 15+ built-in utilities, tab auto-complete, command history, and custom accent themes.
+            </p>
+            <div class="project-tags">
+              <span class="project-tag">Vanilla JS</span>
+              <span class="project-tag">CLI Architecture</span>
+              <span class="project-tag">Keyboard Listener</span>
+            </div>
+          </div>
+          <div class="project-actions">
+            <button class="btn-code" onclick="openTerminalModal()">
+              $ ./launch_cli.sh
+            </button>
+          </div>
+        </div>
+
+        <!-- PROJECT 3 -->
+        <div class="project-card">
+          <div>
+            <div class="project-title">
+              <span>Earth Runtime Telemetry</span>
+              <span style="font-size: 11px; color: var(--accent-neon);">[ LIVE ]</span>
+            </div>
+            <p class="project-desc">
+              Real-time biological and astronomical telemetry calculator computing exact elapsed time, earth orbit distance, and heartbeats lived by human subjects.
+            </p>
+            <div class="project-tags">
+              <span class="project-tag">JavaScript Math</span>
+              <span class="project-tag">Temporal Telemetry</span>
+              <span class="project-tag">Grid UI</span>
+            </div>
+          </div>
+          <div class="project-actions">
+            <button class="btn-code" onclick="runProjectDemo('Earth Runtime Telemetry', 'Calculating Subject: Aadash Karki\n[DOB]: 2014-02-27 (February 27, 2014)\n[STATUS]: Temporal Telemetry Active\n[ORBIT]: Calculating orbital distance...')">
+              $ ./run_demo.sh
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT FORM & PACKET TRANSMITTER -->
+    <section class="cyber-card" id="contact">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="terminal-dot dot-close"></span>
+          <span class="terminal-dot dot-min"></span>
+          <span class="terminal-dot dot-max"></span>
+        </div>
+        <span>[ PACKET_TRANSMITTER // TRANSMIT_MESSAGE ]</span>
+        <span>PORT: 443</span>
+      </div>
+
+      <div class="section-title" style="margin-bottom: 20px;">
+        <span>📡 [ TERMINAL_CONTACT_FORM ]</span>
+      </div>
+
+      <div class="contact-grid">
+        <!-- FORM -->
+        <form class="cyber-form" id="contact-form" onsubmit="transmitPacket(event)">
+          <div class="form-group">
+            <label class="form-label">$ set SENDER_NAME</label>
+            <input type="text" class="form-input" id="inp-name" placeholder="e.g., Cyber Guest" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">$ set SENDER_EMAIL</label>
+            <input type="email" class="form-input" id="inp-email" placeholder="e.g., guest@matrix.net" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">$ set PACKET_PAYLOAD (MESSAGE)</label>
+            <textarea class="form-textarea" id="inp-msg" placeholder="Type message payload..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn-primary" style="justify-content: center;">
+            <span>📡 SEND_PACKET</span>
+          </button>
+        </form>
+
+        <!-- TRANSMISSION LOG WINDOW -->
+        <div>
+          <div class="form-label" style="margin-bottom: 6px;">$ tail -f transmission.log</div>
+          <div class="log-window" id="log-window">
+            <div class="log-item">[0.00s] Transmitter initialized at Node Jhapa-7.</div>
+            <div class="log-item">[0.01s] Waiting for packet payload input...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    </div>
+
+    <!-- ==========================================================================
+         PAGE B: KNOW ABOUT ME & TIME MACHINE (MODELED AFTER HIMAL SAPKOTA'S PORTFOLIO)
+         ========================================================================== -->
+    <div id="page-b" class="page-view font-sans bg-slate-950 text-slate-100 min-h-screen" style="display: none;">
+      
+      <!-- STICKY SUB-NAVIGATION BAR FOR PAGE B -->
+      <nav class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-lg px-4 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+          
+          <!-- Brand Logo -->
+          <div class="flex items-center gap-3">
+            <button onclick="switchPage('a')" class="px-3 py-1.5 text-xs font-semibold rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 transition-all">
+              ← BACK TO MATRIX PORTFOLIO (PAGE A)
+            </button>
+            <div class="hidden sm:block">
+              <span class="text-base font-bold text-white tracking-tight">Aadarsh Karki</span>
+              <span class="text-xs text-blue-400 block font-mono">Class 7 @ Siddhartha Boarding Secondary School</span>
+            </div>
+          </div>
+
+          <!-- Nav Links -->
+          <div class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
+            <a href="#pb-hero" class="hover:text-blue-400 transition-colors">Hero</a>
+            <a href="#pb-about" class="hover:text-blue-400 transition-colors">About</a>
+            <a href="#time-machine" class="hover:text-emerald-400 transition-colors font-semibold text-emerald-400">⏳ Time Machine</a>
+            <a href="#pb-education" class="hover:text-blue-400 transition-colors">Education</a>
+            <a href="#pb-experience" class="hover:text-blue-400 transition-colors">Experience</a>
+            <a href="#pb-skills" class="hover:text-blue-400 transition-colors">Skills</a>
+            <a href="#pb-projects" class="hover:text-blue-400 transition-colors">Projects</a>
+            <a href="#pb-contact" class="hover:text-blue-400 transition-colors">Contact</a>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex items-center gap-2">
+            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 text-xs font-semibold rounded-md bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:opacity-90 text-white transition-all shadow flex items-center gap-1">
+              📸 Instagram
+            </a>
+          </div>
+
+        </div>
+      </nav>
+
+      <!-- MAIN CONTENT WRAPPER -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
+
+        <!-- HERO SECTION -->
+        <section id="pb-hero" class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+          <div class="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center relative z-10">
+            
+            <!-- Avatar Frame -->
+            <div class="md:col-span-4 flex flex-col items-center text-center">
+              <div class="relative group">
+                <div class="w-48 h-48 sm:w-56 sm:h-56 rounded-full overflow-hidden border-4 border-blue-500/40 p-1 bg-slate-800 shadow-2xl transition-all duration-300 group-hover:border-blue-400">
+                  <img src="./src/assets/images/aadash_permanent_photo_1786191408602.jpg" alt="Aadarsh Karki Avatar" class="w-full h-full object-cover rounded-full" referrerPolicy="no-referrer">
+                </div>
+                <span class="absolute bottom-2 right-4 bg-emerald-500 text-slate-950 font-extrabold text-xs px-3 py-1 rounded-full shadow-lg border border-white">
+                  CLASS 7 STUDENT
+                </span>
+              </div>
+
+              <div class="mt-4">
+                <h3 class="text-xl font-bold text-white">Aadarsh Karki</h3>
+                <p class="text-xs text-slate-400 font-mono mt-1">Siddhartha Boarding Secondary School</p>
+                <p class="text-xs text-blue-400 font-mono">Jhapa-7, Koshi Province, Nepal</p>
+              </div>
+            </div>
+
+            <!-- Hero Intro Text -->
+            <div class="md:col-span-8 space-y-4">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold">
+                <span>🚀 ENGINEERING & SOFTWARE EXPLORER</span>
+              </div>
+
+              <h1 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+                "I am an enthusiastic Mechanical & Software Engineering Explorer with a vision to revolutionize the way we design and manufacture products."
+              </h1>
+
+              <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                Greetings! My name is <strong>Aadarsh Karki</strong> (also written as Aadash Karki). I am currently studying in <strong>Class 7 at Siddhartha Boarding Secondary School</strong> in Jhapa-7, Nepal. Born on <strong>February 27, 2014</strong>, I focus on additive manufacturing, AI-driven technologies, metal additive manufacturing (MAM), software development, and sustainable engineering solutions.
+              </p>
+
+              <div class="flex flex-wrap gap-3 pt-2">
+                <a href="#time-machine" class="px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm shadow-lg transition-all flex items-center gap-2">
+                  <span>⏳ Launch Time Machine</span>
+                </a>
+                <a href="#pb-contact" class="px-5 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm border border-slate-700 transition-all">
+                  Contact Me
+                </a>
+                <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 rounded-lg bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:opacity-90 text-white font-semibold text-sm shadow transition-all flex items-center gap-2">
+                  📸 Instagram Profile
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ABOUT SECTION -->
+        <section id="pb-about" class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl">
+          <div class="border-b border-slate-800 pb-4 mb-6 flex items-center justify-between">
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+              <span class="text-blue-400">👤</span> About Aadarsh Karki
+            </h2>
+            <span class="text-xs font-mono text-slate-400">SIUC & Siddhartha Boarding Inspired</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-slate-300 text-sm leading-relaxed">
+            <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700/50">
+              <h3 class="font-bold text-white text-base mb-2 text-blue-400">🏫 Academic Identity</h3>
+              <p>
+                Student in <strong>Class 7 at Siddhartha Boarding Secondary School</strong> in Jhapa-7, Koshi Province, Nepal. Passionate about physics, algebra, computer programming, and matrix UI aesthetics.
+              </p>
+            </div>
+
+            <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700/50">
+              <h3 class="font-bold text-white text-base mb-2 text-emerald-400">🔬 Research Inspiration</h3>
+              <p>
+                Modeled after graduate research engineering standards (Ph.D. / M.S. at Southern Illinois University Carbondale & Tribhuvan University). Focus on metal additive manufacturing (MAM), NDE, and machine learning/deep learning integration.
+              </p>
+            </div>
+
+            <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700/50">
+              <h3 class="font-bold text-white text-base mb-2 text-indigo-400">🌐 Vision & Goals</h3>
+              <p>
+                To create intelligent software applications, pioneer sustainable engineering solutions, and build advanced technological systems that benefit Nepal and global tech communities.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- INTERACTIVE CHRONO TIME MACHINE & STATS COUNTERS (PURE WHITE CIRCLES) -->
+        <section id="time-machine" class="bg-slate-900 border-2 border-emerald-500/40 rounded-2xl p-6 sm:p-10 shadow-2xl relative">
+          
+          <div class="text-center max-w-3xl mx-auto mb-8">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold font-mono mb-3">
+              <span>CHRONO_ENGINE v3.2 // DOB: 2014-02-27</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              ⏳ Aadarsh's Chrono Time Machine & Life Telemetry
+            </h2>
+            <p class="text-slate-400 text-sm mt-2">
+              Drag the temporal slider or click a milestone pill to warp through Aadarsh Karki's life, education at Siddhartha Boarding Secondary School, coding journey, and future horizon!
+            </p>
+          </div>
+
+          <!-- Milestone Pills -->
+          <div class="flex flex-wrap justify-center gap-2 mb-8">
+            <button onclick="scrubTimeMachine(2014)" class="px-3.5 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-all">2014: Birth (Feb 27)</button>
+            <button onclick="scrubTimeMachine(2017)" class="px-3.5 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-all">2017: Kindergarten</button>
+            <button onclick="scrubTimeMachine(2020)" class="px-3.5 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-all">2020: Primary School</button>
+            <button onclick="scrubTimeMachine(2023)" class="px-3.5 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-all">2023: First Code</button>
+            <button onclick="scrubTimeMachine(2026)" class="px-3.5 py-1.5 rounded-full bg-emerald-500 text-slate-950 font-bold text-xs transition-all shadow-md">2026: Class 7 (Present)</button>
+            <button onclick="scrubTimeMachine(2030)" class="px-3.5 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-all">2030: High School</button>
+            <button onclick="scrubTimeMachine(2035)" class="px-3.5 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-all">2035: Future Horizon</button>
+          </div>
+
+          <!-- Slider Control -->
+          <div class="max-w-xl mx-auto mb-10 text-center">
+            <div class="flex justify-between text-xs font-mono font-bold text-slate-400 mb-2">
+              <span>2014 (BIRTH)</span>
+              <span id="tm-current-year-label" class="text-emerald-400 text-base font-extrabold">2026 (PRESENT)</span>
+              <span>2035 (FUTURE)</span>
+            </div>
+            <input type="range" min="2014" max="2035" value="2026" step="1" id="tm-slider" oninput="onTimeSliderChange(this.value)" class="w-full h-3 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+          </div>
+
+          <!-- Warp HUD Box -->
+          <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-6 mb-12 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            <div class="md:col-span-4 border-b md:border-b-0 md:border-r border-slate-700 pb-4 md:pb-0 md:pr-6 text-center md:text-left">
+              <span class="text-xs font-mono text-slate-400 uppercase">Target Chrono Era</span>
+              <div id="tm-hud-year" class="text-4xl font-black text-emerald-400 tracking-tight">2026</div>
+              <div class="mt-2 text-xs font-mono text-slate-300">
+                Calculated Age: <span id="tm-hud-age" class="font-bold text-white">12 Years Old</span>
+              </div>
+              <div class="mt-1 text-xs font-mono text-slate-300">
+                School: <span id="tm-hud-school" class="font-semibold text-blue-400">Siddhartha Boarding Secondary School</span>
+              </div>
+            </div>
+
+            <div class="md:col-span-8 space-y-2">
+              <div class="text-xs font-mono text-emerald-400 font-bold">$ cat milestone_data.json --era <span id="tm-hud-era-code">2026</span></div>
+              <h4 id="tm-hud-title" class="text-lg font-bold text-white">Class 7 Student & Web Architect</h4>
+              <p id="tm-hud-desc" class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                Attending Siddhartha Boarding Secondary School in Jhapa-7, Nepal in Class 7. Mastering HTML, CSS, JavaScript, Python tools, and matrix aesthetic UI design while excelling in school studies.
+              </p>
+              <div id="tm-hud-tags" class="flex flex-wrap gap-2 pt-2">
+                <span class="px-2.5 py-0.5 rounded-md bg-slate-900 text-emerald-400 text-xs font-mono border border-slate-700">Siddhartha Boarding School</span>
+                <span class="px-2.5 py-0.5 rounded-md bg-slate-900 text-emerald-400 text-xs font-mono border border-slate-700">Class 7</span>
+                <span class="px-2.5 py-0.5 rounded-md bg-slate-900 text-emerald-400 text-xs font-mono border border-slate-700">Matrix Digital Rain</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- COUNTING NUMBERS / STAT ELEMENTS IN PURE WHITE CIRCLES -->
+          <div class="pt-4">
+            <h3 class="text-center text-lg font-bold text-white mb-2">
+              ⏱️ Physical Earth Telemetry Counters (Live Update)
+            </h3>
+            <p class="text-center text-xs text-slate-400 mb-8">
+              Exact life runtime metrics calculated live from Aadarsh Karki's birth on February 27, 2014
+            </p>
+
+            <!-- 7 Pure White Circles Grid (Compact Size with Animated Ticks) -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 justify-items-center">
+              
+              <!-- Circle 1: Years -->
+              <div class="flex flex-col items-center">
+                <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-white text-gray-900 flex flex-col items-center justify-center shadow-xl border-4 border-blue-500 font-extrabold text-center p-1.5 transition-all duration-300 hover:scale-105 hover:border-emerald-500">
+                  <span id="tm-cnt-years" class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">12.45</span>
+                  <span class="text-[9px] sm:text-[10px] uppercase font-bold text-blue-700 mt-0.5">Years</span>
+                </div>
+                <span class="text-[11px] text-slate-400 mt-1 font-mono">Orbital Circles</span>
+              </div>
+
+              <!-- Circle 2: Months -->
+              <div class="flex flex-col items-center">
+                <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-white text-gray-900 flex flex-col items-center justify-center shadow-xl border-4 border-blue-500 font-extrabold text-center p-1.5 transition-all duration-300 hover:scale-105 hover:border-emerald-500">
+                  <span id="tm-cnt-months" class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">149</span>
+                  <span class="text-[9px] sm:text-[10px] uppercase font-bold text-blue-700 mt-0.5">Months</span>
+                </div>
+                <span class="text-[11px] text-slate-400 mt-1 font-mono">Lunar Cycles</span>
+              </div>
+
+              <!-- Circle 3: Days -->
+              <div class="flex flex-col items-center">
+                <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-white text-gray-900 flex flex-col items-center justify-center shadow-xl border-4 border-blue-500 font-extrabold text-center p-1.5 transition-all duration-300 hover:scale-105 hover:border-emerald-500">
+                  <span id="tm-cnt-days" class="text-base sm:text-lg font-black text-slate-900 tracking-tight">4,546</span>
+                  <span class="text-[9px] sm:text-[10px] uppercase font-bold text-blue-700 mt-0.5">Days Lived</span>
+                </div>
+                <span class="text-[11px] text-slate-400 mt-1 font-mono">Earth Rotations</span>
+              </div>
+
+              <!-- Circle 4: Hours -->
+              <div class="flex flex-col items-center">
+                <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-white text-gray-900 flex flex-col items-center justify-center shadow-xl border-4 border-blue-500 font-extrabold text-center p-1.5 transition-all duration-300 hover:scale-105 hover:border-emerald-500">
+                  <span id="tm-cnt-hours" class="text-sm sm:text-base font-black text-slate-900 tracking-tight">109,104</span>
+                  <span class="text-[9px] sm:text-[10px] uppercase font-bold text-blue-700 mt-0.5">Hours</span>
+                </div>
+                <span class="text-[11px] text-slate-400 mt-1 font-mono">Total Hours</span>
+              </div>
+
+              <!-- Circle 5: Seconds -->
+              <div class="flex flex-col items-center">
+                <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-white text-gray-900 flex flex-col items-center justify-center shadow-xl border-4 border-blue-500 font-extrabold text-center p-1.5 transition-all duration-300 hover:scale-105 hover:border-emerald-500">
+                  <span id="tm-cnt-seconds" class="text-[11px] sm:text-xs font-black text-slate-900 tracking-tighter">392,774,400</span>
+                  <span class="text-[9px] sm:text-[10px] uppercase font-bold text-blue-700 mt-0.5">Seconds</span>
+                </div>
+                <span class="text-[11px] text-slate-400 mt-1 font-mono">Live Ticks</span>
+              </div>
+
+              <!-- Circle 6: Heartbeats -->
+              <div class="flex flex-col items-center">
+                <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-white text-gray-900 flex flex-col items-center justify-center shadow-xl border-4 border-blue-500 font-extrabold text-center p-1.5 transition-all duration-300 hover:scale-105 hover:border-emerald-500">
+                  <span id="tm-cnt-hearts" class="text-sm sm:text-base font-black text-slate-900 tracking-tight">471M+</span>
+                  <span class="text-[9px] sm:text-[10px] uppercase font-bold text-blue-700 mt-0.5">Heartbeats</span>
+                </div>
+                <span class="text-[11px] text-slate-400 mt-1 font-mono">~80 BPM Avg</span>
+              </div>
+
+              <!-- Circle 7: Solar Space -->
+              <div class="flex flex-col items-center">
+                <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-white text-gray-900 flex flex-col items-center justify-center shadow-xl border-4 border-blue-500 font-extrabold text-center p-1.5 transition-all duration-300 hover:scale-105 hover:border-emerald-500">
+                  <span id="tm-cnt-space" class="text-sm sm:text-base font-black text-slate-900 tracking-tight">11.8B km</span>
+                  <span class="text-[9px] sm:text-[10px] uppercase font-bold text-blue-700 mt-0.5">Solar Space</span>
+                </div>
+                <span class="text-[11px] text-slate-400 mt-1 font-mono">Orbit Distance</span>
+              </div>
+
+            </div>
+          </div>
+
+        </section>
+
+        <!-- EDUCATION SECTION (HIMAL SAPKOTA CHRONOLOGICAL FORMAT) -->
+        <section id="pb-education" class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl">
+          <div class="border-b border-slate-800 pb-4 mb-8">
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+              <span class="text-blue-400">🎓</span> Education Timeline
+            </h2>
+            <p class="text-slate-400 text-xs mt-1">Chronological academic cards from Class 7 in Nepal to Advanced Engineering Research</p>
+          </div>
+
+          <div class="space-y-6">
+            
+            <!-- Education Card 1 -->
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 hover:border-blue-500/50 transition-all shadow-md">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                <h3 class="text-lg font-bold text-white">Class 7 & Web Architect Student</h3>
+                <span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold w-fit">Jan 2025 - Present</span>
+              </div>
+              <p class="text-sm font-semibold text-blue-400">Siddhartha Boarding Secondary School | Jhapa-7, Koshi Province, Nepal</p>
+              <p class="text-slate-300 text-xs sm:text-sm mt-3 leading-relaxed">
+                Currently excelling in Class 7 studies. Mastering school mathematics, science, computer studies, and building matrix web applications, live telemetry engines, and terminal CLI interfaces.
+              </p>
+            </div>
+
+            <!-- Education Card 2 -->
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 hover:border-blue-500/50 transition-all shadow-md">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                <h3 class="text-lg font-bold text-white">Ph.D. in Mechanical Engineering (Target Research Vision)</h3>
+                <span class="px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/30 text-xs font-mono font-bold w-fit">Aug 2025 - Present</span>
+              </div>
+              <p class="text-sm font-semibold text-blue-400">Southern Illinois University Carbondale</p>
+              <p class="text-slate-300 text-xs sm:text-sm mt-3 leading-relaxed">
+                Specializing in Additive Manufacturing, Metal LPBF 3D Printer Optimization, Machine Learning defect detection, and sustainable manufacturing systems.
+              </p>
+            </div>
+
+            <!-- Education Card 3 -->
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 hover:border-blue-500/50 transition-all shadow-md">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                <h3 class="text-lg font-bold text-white">Master of Science in Mechanical Engineering</h3>
+                <span class="px-3 py-1 rounded-full bg-slate-700 text-slate-300 text-xs font-mono font-bold w-fit">Jan 2023 - May 2025</span>
+              </div>
+              <p class="text-sm font-semibold text-blue-400">Southern Illinois University Carbondale</p>
+              <p class="text-slate-300 text-xs sm:text-sm mt-3 leading-relaxed">
+                Significant coursework: Six Sigma Black Belt, Advanced Mechanics, CAD/CAM, Additive Manufacturing, Deep Learning, and Non-Destructive Evaluation (NDE).
+              </p>
+            </div>
+
+            <!-- Education Card 4 -->
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 hover:border-blue-500/50 transition-all shadow-md">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                <h3 class="text-lg font-bold text-white">Bachelor's in Mechanical Engineering & Schooling Foundation</h3>
+                <span class="px-3 py-1 rounded-full bg-slate-700 text-slate-300 text-xs font-mono font-bold w-fit">Tribhuvan University & Siddhartha Boarding School</span>
+              </div>
+              <p class="text-sm font-semibold text-blue-400">Tribhuvan University, Nepal & Siddhartha Boarding Secondary School, Jhapa-7</p>
+              <p class="text-slate-300 text-xs sm:text-sm mt-3 leading-relaxed">
+                Comprehensive engineering fundamentals, mechanics, fluid dynamics, thermodynamics, computer programming, and academic excellence in Nepal.
+              </p>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- EXPERIENCE SECTION -->
+        <section id="pb-experience" class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl">
+          <div class="border-b border-slate-800 pb-4 mb-8">
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+              <span class="text-blue-400">💼</span> Professional Experience & Leadership
+            </h2>
+          </div>
+
+          <div class="space-y-6">
+            
+            <!-- Exp Card 1 -->
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 hover:border-emerald-500/50 transition-all shadow-md">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                <h3 class="text-lg font-bold text-white">Class 7 Tech Leader & Web Architect</h3>
+                <span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold w-fit">Jan 2023 - Present</span>
+              </div>
+              <p class="text-sm font-semibold text-emerald-400">Siddhartha Boarding Secondary School | Jhapa-7, Nepal</p>
+              <ul class="list-disc list-inside text-slate-300 text-xs sm:text-sm mt-3 space-y-1.5 leading-relaxed">
+                <li>Developing matrix-themed web applications, real-time life telemetry engines, and retro CLI terminal tools.</li>
+                <li>Organizing peer workshops on basic computer logic, web tags, and coding at Siddhartha Boarding Secondary School.</li>
+                <li>Combining school academic studies with web design and software engineering projects.</li>
+              </ul>
+            </div>
+
+            <!-- Exp Card 2 -->
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 hover:border-blue-500/50 transition-all shadow-md">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                <h3 class="text-lg font-bold text-white">Graduate Research Assistant</h3>
+                <span class="px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/30 text-xs font-mono font-bold w-fit">Aug 2023 - Present</span>
+              </div>
+              <p class="text-sm font-semibold text-blue-400">Southern Illinois University Carbondale | Advanced Manufacturing Lab</p>
+              <ul class="list-disc list-inside text-slate-300 text-xs sm:text-sm mt-3 space-y-1.5 leading-relaxed">
+                <li>Lab manager for Advanced Manufacturing Lab operating XM 200G LPBF 3D printer optimization.</li>
+                <li>Achieved >99.5% wrought density in metal additive manufacturing parts through parameter tuning.</li>
+                <li>Performed FMEA, Root Cause Analysis (RCA), and XCT volumetric inspection datasets.</li>
+              </ul>
+            </div>
+
+            <!-- Exp Card 3 -->
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 hover:border-blue-500/50 transition-all shadow-md">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                <h3 class="text-lg font-bold text-white">Graduate Teaching Assistant</h3>
+                <span class="px-3 py-1 rounded-full bg-slate-700 text-slate-300 text-xs font-mono font-bold w-fit">Jan 2023 - Dec 2024</span>
+              </div>
+              <p class="text-sm font-semibold text-blue-400">SIUC Department of Mechanical Engineering</p>
+              <p class="text-slate-300 text-xs sm:text-sm mt-2 leading-relaxed">
+                Handled laboratory sessions for Heat Transfer, Fluid Dynamics, Materials Science, and CAD drafting.
+              </p>
+            </div>
+
+            <!-- Exp Card 4 -->
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 hover:border-blue-500/50 transition-all shadow-md">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                <h3 class="text-lg font-bold text-white">Mechanical Engineer & Service Coordinator</h3>
+                <span class="px-3 py-1 rounded-full bg-slate-700 text-slate-300 text-xs font-mono font-bold w-fit">May 2019 - Nov 2022</span>
+              </div>
+              <p class="text-sm font-semibold text-blue-400">Dakshesh Agro Pvt. Ltd. | Nepal</p>
+              <p class="text-slate-300 text-xs sm:text-sm mt-2 leading-relaxed">
+                Agricultural machinery maintenance, reducing downtime through preventative protocols and Just-In-Time (JIT) inventory management.
+              </p>
+            </div>
+
+            <!-- Exp Card 5 -->
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 hover:border-blue-500/50 transition-all shadow-md">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                <h3 class="text-lg font-bold text-white">Vice Principal & Coordinator</h3>
+                <span class="px-3 py-1 rounded-full bg-slate-700 text-slate-300 text-xs font-mono font-bold w-fit">Aug 2017 - Mar 2019</span>
+              </div>
+              <p class="text-sm font-semibold text-blue-400">Sindhuli Gadi Public English School | Nepal</p>
+              <p class="text-slate-300 text-xs sm:text-sm mt-2 leading-relaxed">
+                Academic administration, curriculum oversight, and STEM student mentoring.
+              </p>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- SKILLS SECTION -->
+        <section id="pb-skills" class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl">
+          <div class="border-b border-slate-800 pb-4 mb-8">
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+              <span class="text-blue-400">🛠️</span> Technical Skills & Proficiency
+            </h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- Skill 1 -->
+            <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+              <div class="flex justify-between items-center mb-1.5 text-sm font-bold text-white">
+                <span>SolidWorks (CAD/CAM)</span>
+                <span class="text-blue-400">90%</span>
+              </div>
+              <div class="w-full bg-slate-700 rounded-full h-2.5">
+                <div class="bg-blue-500 h-2.5 rounded-full" style="width: 90%;"></div>
+              </div>
+            </div>
+
+            <!-- Skill 2 -->
+            <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+              <div class="flex justify-between items-center mb-1.5 text-sm font-bold text-white">
+                <span>Autodesk Inventor</span>
+                <span class="text-blue-400">95%</span>
+              </div>
+              <div class="w-full bg-slate-700 rounded-full h-2.5">
+                <div class="bg-blue-500 h-2.5 rounded-full" style="width: 95%;"></div>
+              </div>
+            </div>
+
+            <!-- Skill 3 -->
+            <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+              <div class="flex justify-between items-center mb-1.5 text-sm font-bold text-white">
+                <span>AutoCAD (2D/3D)</span>
+                <span class="text-blue-400">85%</span>
+              </div>
+              <div class="w-full bg-slate-700 rounded-full h-2.5">
+                <div class="bg-blue-500 h-2.5 rounded-full" style="width: 85%;"></div>
+              </div>
+            </div>
+
+            <!-- Skill 4 -->
+            <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+              <div class="flex justify-between items-center mb-1.5 text-sm font-bold text-white">
+                <span>Ansys Workbench</span>
+                <span class="text-blue-400">80%</span>
+              </div>
+              <div class="w-full bg-slate-700 rounded-full h-2.5">
+                <div class="bg-blue-500 h-2.5 rounded-full" style="width: 80%;"></div>
+              </div>
+            </div>
+
+            <!-- Skill 5 -->
+            <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+              <div class="flex justify-between items-center mb-1.5 text-sm font-bold text-white">
+                <span>MATLAB & Python</span>
+                <span class="text-blue-400">85% | 80%</span>
+              </div>
+              <div class="w-full bg-slate-700 rounded-full h-2.5">
+                <div class="bg-emerald-500 h-2.5 rounded-full" style="width: 82%;"></div>
+              </div>
+            </div>
+
+            <!-- Skill 6 -->
+            <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+              <div class="flex justify-between items-center mb-1.5 text-sm font-bold text-white">
+                <span>HTML / CSS / Web Architecture</span>
+                <span class="text-emerald-400">92%</span>
+              </div>
+              <div class="w-full bg-slate-700 rounded-full h-2.5">
+                <div class="bg-emerald-500 h-2.5 rounded-full" style="width: 92%;"></div>
+              </div>
+            </div>
+
+            <!-- Skill 7 -->
+            <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+              <div class="flex justify-between items-center mb-1.5 text-sm font-bold text-white">
+                <span>Minitab & Quality Engineering</span>
+                <span class="text-blue-400">85%</span>
+              </div>
+              <div class="w-full bg-slate-700 rounded-full h-2.5">
+                <div class="bg-blue-500 h-2.5 rounded-full" style="width: 85%;"></div>
+              </div>
+            </div>
+
+            <!-- Skill 8 -->
+            <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+              <div class="flex justify-between items-center mb-1.5 text-sm font-bold text-white">
+                <span>MS Office Suite & Productivity</span>
+                <span class="text-blue-400">90%</span>
+              </div>
+              <div class="w-full bg-slate-700 rounded-full h-2.5">
+                <div class="bg-blue-500 h-2.5 rounded-full" style="width: 90%;"></div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- PROJECTS & RESEARCH AREAS SECTION -->
+        <section id="pb-projects" class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl">
+          <div class="border-b border-slate-800 pb-4 mb-8">
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+              <span class="text-blue-400">🔬</span> Projects & Research Areas
+            </h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-6 hover:border-blue-500/50 transition-all flex flex-col justify-between">
+              <div>
+                <span class="text-2xl mb-3 block">⚙️</span>
+                <h3 class="text-lg font-bold text-white mb-2">Metal Additive Manufacturing (MAM)</h3>
+                <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                  Optimization of XM 200G Laser Powder Bed Fusion (LPBF) parameters for high density alloy printing, microstructural evaluation, and porosity reduction.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-slate-700/50 flex flex-wrap gap-1.5">
+                <span class="px-2 py-0.5 rounded bg-slate-900 text-blue-400 text-[11px] font-mono">LPBF 3D Printing</span>
+                <span class="px-2 py-0.5 rounded bg-slate-900 text-blue-400 text-[11px] font-mono">Density Optimization</span>
+              </div>
+            </div>
+
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-6 hover:border-blue-500/50 transition-all flex flex-col justify-between">
+              <div>
+                <span class="text-2xl mb-3 block">📐</span>
+                <h3 class="text-lg font-bold text-white mb-2">Topology Optimization & DfAM</h3>
+                <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                  Design for Additive Manufacturing (DfAM) utilizing lightweight structural optimization, lattice structures, and finite element stress simulation.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-slate-700/50 flex flex-wrap gap-1.5">
+                <span class="px-2 py-0.5 rounded bg-slate-900 text-blue-400 text-[11px] font-mono">CAD / Ansys</span>
+                <span class="px-2 py-0.5 rounded bg-slate-900 text-blue-400 text-[11px] font-mono">Lattice Structures</span>
+              </div>
+            </div>
+
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-6 hover:border-blue-500/50 transition-all flex flex-col justify-between">
+              <div>
+                <span class="text-2xl mb-3 block">🤖</span>
+                <h3 class="text-lg font-bold text-white mb-2">Defect Detection & Machine Learning in AM</h3>
+                <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                  Applying deep learning computer vision models to XCT scan inspection datasets for automated defect classification and quality assurance.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-slate-700/50 flex flex-wrap gap-1.5">
+                <span class="px-2 py-0.5 rounded bg-slate-900 text-blue-400 text-[11px] font-mono">Deep Learning</span>
+                <span class="px-2 py-0.5 rounded bg-slate-900 text-blue-400 text-[11px] font-mono">XCT Data</span>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- CONTACT SECTION -->
+        <section id="pb-contact" class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 sm:p-10 shadow-2xl">
+          <div class="border-b border-slate-800 pb-4 mb-8">
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+              <span class="text-blue-400">📬</span> Contact Aadarsh Karki & Engineering Office
+            </h2>
+            <p class="text-slate-400 text-xs mt-1">Get in touch for collaborations, research inquiries, or school STEM projects</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+            
+            <!-- Contact Details -->
+            <div class="md:col-span-5 space-y-6 text-slate-300 text-sm">
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-lg border border-blue-500/20 shrink-0">📍</div>
+                <div>
+                  <h4 class="font-bold text-white">Location</h4>
+                  <p class="text-slate-300 text-xs mt-0.5">Jhapa-7, Koshi Province, Nepal</p>
+                  <p class="text-slate-400 text-xs font-mono">Siddhartha Boarding Secondary School / Carbondale, IL</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-lg border border-blue-500/20 shrink-0">📞</div>
+                <div>
+                  <h4 class="font-bold text-white">Phone Contact</h4>
+                  <p class="text-slate-300 text-xs font-mono mt-0.5">+1 (618)-559-6736</p>
+                  <p class="text-slate-400 text-xs font-mono">+977 (Jhapa-7 Contact Line)</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-lg border border-blue-500/20 shrink-0">✉️</div>
+                <div>
+                  <h4 class="font-bold text-white">Email Address</h4>
+                  <p class="text-slate-300 text-xs font-mono mt-0.5">himal.sapkota@siu.edu</p>
+                  <p class="text-slate-400 text-xs font-mono">aadarsh.karki@siddhartha.edu.np</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3 pt-2">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-amber-500 via-pink-600 to-purple-600 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-md">📸</div>
+                <div>
+                  <h4 class="font-bold text-white">Instagram Profile</h4>
+                  <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="text-xs text-pink-400 hover:underline font-mono break-all">
+                    https://www.instagram.com/aadarsh_karki
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Send Message Form -->
+            <div class="md:col-span-7 bg-slate-800/50 p-6 rounded-xl border border-slate-700/60">
+              <form onsubmit="event.preventDefault(); alert('Message dispatched! Thank you for contacting Aadarsh Karki.');" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Your Name</label>
+                  <input type="text" required placeholder="Enter your full name" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Your Email</label>
+                  <input type="email" required placeholder="name@example.com" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Message</label>
+                  <textarea rows="4" required placeholder="Write your message here..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+
+                <button type="submit" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg transition-all">
+                  Send Message
+                </button>
+              </form>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- FOOTER FOR PAGE B -->
+        <footer class="text-center text-xs text-slate-500 py-6 border-t border-slate-800">
+          <p>© 2026 Aadarsh Karki & Himal Sapkota Style Engineering Portfolio. All Rights Reserved.</p>
+          <p class="mt-1">Class 7 @ Siddhartha Boarding Secondary School | Jhapa-7, Koshi Province, Nepal</p>
+        </footer>
+
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+        <span>© 2026 Aadash Karki | Jhapa-7, Nepal</span>
+        <a href="https://www.facebook.com/share/1TvJQwimwx/" target="_blank" rel="noopener noreferrer" class="nav-link" style="color: var(--accent-neon); border: 1px solid var(--border-color); background: rgba(0, 255, 102, 0.08); padding: 4px 10px; border-radius: 3px; font-weight: 600; text-decoration: none;">
+          🔵 FACEBOOK: https://www.facebook.com/share/1TvJQwimwx/
+        </a>
+      </div>
+
+      <div class="footer-status">
+        <div class="status-item">
+          <div class="pulse-dot"></div>
+          <span>STATUS: ONLINE</span>
+        </div>
+        <div class="status-item">
+          <span>LOCATION: JHAPA-7, NEPAL</span>
+        </div>
+        <div class="status-item">
+          <span>LATENCY: <span id="val-latency">12ms</span></span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- INTERACTIVE TERMINAL MODAL CLI -->
+  <div class="modal-overlay" id="cli-modal" onclick="closeModalOnOverlay(event)">
+    <div class="terminal-modal">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="terminal-dot dot-close" onclick="closeTerminalModal()" style="cursor: pointer;"></span>
+          <span class="terminal-dot dot-min"></span>
+          <span class="terminal-dot dot-max"></span>
+        </div>
+        <span>aadash@nepal-node:~ /interactive_shell</span>
+        <span onclick="closeTerminalModal()" style="cursor: pointer; color: var(--accent-neon);">[ ESC / CLOSE ]</span>
+      </div>
+
+      <div class="terminal-modal-body" id="modal-cli-body">
+        <div style="color: var(--accent-neon); font-weight: bold;">
+          Aadash Karki Cyber Shell v2.4 (Jhapa-7 Node)
+        </div>
+        <div style="color: var(--text-muted); margin-bottom: 10px;">
+          Type 'help' to view available system commands.
+        </div>
+      </div>
+
+      <div class="cli-input-line">
+        <span class="cli-prompt">aadash@jhapa-7:~$</span>
+        <input type="text" class="cli-input" id="cli-input-field" placeholder="type a command... (e.g. help, bio, skills)" autocomplete="off">
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLICATION LOGIC & ANIMATIONS -->
+  <script>
+    /* ==========================================================================
+       1. MATRIX DIGITAL RAIN CANVAS ENGINE
+       ========================================================================== */
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    // Character Sets (Matrix Katakana + Binary + Hex)
+    const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+    const latin = '0123456789ABCDEF01';
+    const matrixChars = (katakana + latin).split('');
+
+    const fontSize = 14;
+    let columns = Math.floor(width / fontSize);
+    let drops = Array(columns).fill(1);
+
+    function drawMatrix() {
+      // Translucent black rectangle to create trailing decay
+      ctx.fillStyle = 'rgba(0, 11, 0, 0.06)';
+      ctx.fillRect(0, 0, width, height);
+
+      // Get current theme accent color or default
+      const computedAccent = getComputedStyle(document.body).getPropertyValue('--accent-bright').trim() || '#00FF41';
+
+      ctx.font = fontSize + 'px monospace';
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+        
+        // Head glow white character occasionally
+        if (Math.random() > 0.92) {
+          ctx.fillStyle = '#FFFFFF';
+        } else {
+          ctx.fillStyle = computedAccent;
+        }
+
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    let matrixInterval = setInterval(drawMatrix, 33);
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      columns = Math.floor(width / fontSize);
+      drops = Array(columns).fill(1);
+    });
+
+    /* ==========================================================================
+       2. REAL-TIME "TIME SPENT ON EARTH" LIVE COUNTER & ANIMATED INCREMENTOR
+       ========================================================================== */
+    // DOB: February 27, 2014 (2014-02-27)
+    const dob = new Date('2014-02-27T00:00:00');
+    let isInitialAnimDone = false;
+
+    function animateCounterVal(el, startVal, targetVal, duration = 1200, isFloat = false, suffix = '') {
+      if (!el) return;
+      
+      const startTime = performance.now();
+      const range = targetVal - startVal;
+      
+      function step(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+        const current = startVal + range * ease;
+        
+        if (isFloat) {
+          el.textContent = current.toFixed(2) + suffix;
+        } else if (suffix.includes('M+')) {
+          el.textContent = (current / 1000000).toFixed(1) + 'M+';
+        } else {
+          el.textContent = Math.floor(current).toLocaleString() + suffix;
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          // Trigger pulse pop effect on finish
+          const circle = el.closest('.rounded-full');
+          if (circle) {
+            circle.classList.remove('circle-tick-pulse');
+            void circle.offsetWidth;
+            circle.classList.add('circle-tick-pulse');
+          }
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    function triggerCounterRolls() {
+      const now = new Date();
+      const diffMs = now - dob;
+
+      const totalSeconds = Math.floor(diffMs / 1000);
+      const totalMinutes = Math.floor(totalSeconds / 60);
+      const totalHours = Math.floor(totalMinutes / 60);
+      const totalDays = Math.floor(totalHours / 24);
+      const totalYears = parseFloat((totalDays / 365.25).toFixed(2));
+      const totalMonths = Math.floor(totalYears * 12);
+      const totalHearts = Math.floor(totalSeconds * 1.33);
+      const orbitKmNum = parseFloat(((totalHours * 107000) / 1000000000).toFixed(2));
+
+      // Roll up all Page B circles
+      animateCounterVal(document.getElementById('tm-cnt-years'), 0, totalYears, 1200, true);
+      animateCounterVal(document.getElementById('tm-cnt-months'), 0, totalMonths, 1100);
+      animateCounterVal(document.getElementById('tm-cnt-days'), 0, totalDays, 1300);
+      animateCounterVal(document.getElementById('tm-cnt-hours'), 0, totalHours, 1400);
+      animateCounterVal(document.getElementById('tm-cnt-seconds'), totalSeconds - 50, totalSeconds, 1000);
+      animateCounterVal(document.getElementById('tm-cnt-hearts'), 0, totalHearts, 1200, false, 'M+');
+      animateCounterVal(document.getElementById('tm-cnt-space'), 0, orbitKmNum, 1500, true, 'B km');
+
+      // Roll up Page A counters
+      animateCounterVal(document.getElementById('cnt-years'), 0, totalYears, 1200, true);
+      animateCounterVal(document.getElementById('cnt-days'), 0, totalDays, 1300);
+      animateCounterVal(document.getElementById('cnt-hours'), 0, totalHours, 1400);
+      animateCounterVal(document.getElementById('cnt-minutes'), 0, totalMinutes, 1350);
+      animateCounterVal(document.getElementById('cnt-seconds'), totalSeconds - 50, totalSeconds, 1000);
+    }
+
+    function updateLifeCounter() {
+      const now = new Date();
+      const diffMs = now - dob;
+
+      const totalSeconds = Math.floor(diffMs / 1000);
+      const totalMinutes = Math.floor(totalSeconds / 60);
+      const totalHours = Math.floor(totalMinutes / 60);
+      const totalDays = Math.floor(totalHours / 24);
+      const totalYears = (totalDays / 365.25).toFixed(2);
+      const totalMonths = Math.floor(parseFloat(totalYears) * 12);
+      const totalHearts = Math.floor(totalSeconds * 1.33);
+      const orbitKm = ((totalHours * 107000) / 1000000000).toFixed(2) + 'B km';
+
+      if (!isInitialAnimDone) {
+        isInitialAnimDone = true;
+        triggerCounterRolls();
+      } else {
+        // Page A counters
+        const elYears = document.getElementById('cnt-years');
+        if (elYears) elYears.textContent = totalYears;
+        const elDays = document.getElementById('cnt-days');
+        if (elDays) elDays.textContent = totalDays.toLocaleString();
+        const elHours = document.getElementById('cnt-hours');
+        if (elHours) elHours.textContent = totalHours.toLocaleString();
+        const elMins = document.getElementById('cnt-minutes');
+        if (elMins) elMins.textContent = totalMinutes.toLocaleString();
+        const elSecs = document.getElementById('cnt-seconds');
+        if (elSecs) elSecs.textContent = totalSeconds.toLocaleString();
+        const elSpace = document.getElementById('cnt-space');
+        if (elSpace) elSpace.textContent = orbitKm;
+
+        // Page B counters
+        const tmYears = document.getElementById('tm-cnt-years');
+        if (tmYears) tmYears.textContent = totalYears;
+
+        const tmMonths = document.getElementById('tm-cnt-months');
+        if (tmMonths) tmMonths.textContent = totalMonths;
+
+        const tmDays = document.getElementById('tm-cnt-days');
+        if (tmDays) tmDays.textContent = totalDays.toLocaleString();
+
+        const tmHours = document.getElementById('tm-cnt-hours');
+        if (tmHours) tmHours.textContent = totalHours.toLocaleString();
+
+        const tmSecs = document.getElementById('tm-cnt-seconds');
+        if (tmSecs) {
+          tmSecs.textContent = totalSeconds.toLocaleString();
+          const circleSec = tmSecs.closest('.rounded-full');
+          if (circleSec) {
+            circleSec.classList.remove('circle-tick-pulse');
+            void circleSec.offsetWidth;
+            circleSec.classList.add('circle-tick-pulse');
+          }
+        }
+
+        const tmHearts = document.getElementById('tm-cnt-hearts');
+        if (tmHearts) {
+          tmHearts.textContent = (totalHearts / 1000000).toFixed(1) + 'M+';
+          const circleH = tmHearts.closest('.rounded-full');
+          if (circleH) {
+            circleH.classList.remove('circle-tick-pulse');
+            void circleH.offsetWidth;
+            circleH.classList.add('circle-tick-pulse');
+          }
+        }
+
+        const tmSpace = document.getElementById('tm-cnt-space');
+        if (tmSpace) tmSpace.textContent = orbitKm;
+      }
+
+      // Update progress bar percentage benchmark
+      const progressFill = document.getElementById('life-progress-fill');
+      if (progressFill) {
+        const pct = Math.min(100, Math.max(1, (parseFloat(totalYears) / 100) * 100));
+        progressFill.style.width = pct + '%';
+      }
+    }
+
+    setInterval(updateLifeCounter, 1000);
+    updateLifeCounter();
+
+    /* ==========================================================================
+       PAGE SWITCHING ROUTER (PAGE A: PORTFOLIO <-> PAGE B: TIME MACHINE)
+       ========================================================================== */
+    function switchPage(pageId) {
+      const pageA = document.getElementById('page-a');
+      const pageB = document.getElementById('page-b');
+      if (!pageA || !pageB) return;
+
+      playBleep(1100, 'square', 0.12);
+
+      if (pageId === 'b') {
+        pageA.style.display = 'none';
+        pageB.style.display = 'block';
+        window.location.hash = '#know-about-me';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Trigger counter roll-up animations
+        triggerCounterRolls();
+        // Trigger initial slider HUD update
+        if (document.getElementById('tm-slider')) {
+          onTimeSliderChange(document.getElementById('tm-slider').value);
+        }
+      } else {
+        pageB.style.display = 'none';
+        pageA.style.display = 'block';
+        if (window.location.hash === '#know-about-me' || window.location.hash === '#time-machine') {
+          window.location.hash = '#portfolio';
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    // Handle hash change on load and back/forward navigation
+    function handleHashRoute() {
+      const hash = window.location.hash;
+      if (hash === '#know-about-me' || hash === '#time-machine' || hash === '#page-b') {
+        switchPage('b');
+      } else if (hash === '#portfolio' || hash === '#home') {
+        switchPage('a');
+      }
+    }
+
+    window.addEventListener('hashchange', handleHashRoute);
+    window.addEventListener('load', handleHashRoute);
+
+    /* ==========================================================================
+       PAGE B TIME MACHINE ENGINE (INSPIRED BY HIMAL SAPKOTA'S CHRONO MACHINE)
+       ========================================================================== */
+    const timeMachineMilestones = {
+      2014: {
+        title: "Birth of Aadarsh Karki in Jhapa, Nepal",
+        desc: "Born on February 27, 2014 in Jhapa-7, Koshi Province, Nepal. The journey on Earth begins!",
+        school: "Infant / Newborn",
+        tags: ["Jhapa-7", "Nepal", "Feb 27, 2014"]
+      },
+      2015: {
+        title: "Early Steps & First Words",
+        desc: "Exploring the surroundings in Jhapa, learning to walk, talk, and discover toys and picture books.",
+        school: "Early Childhood",
+        tags: ["First Steps", "Jhapa-7"]
+      },
+      2016: {
+        title: "Curious Preschooler",
+        desc: "Loves listening to stories, playing with puzzles, and recognizing colors and shapes.",
+        school: "Preschooler",
+        tags: ["Puzzles", "Colors"]
+      },
+      2017: {
+        title: "Kindergarten Adventures",
+        desc: "Enrolled in early schooling, starting to read letters, numbers, and draw sketches.",
+        school: "Kindergarten",
+        tags: ["Reading", "Drawing", "Numbers"]
+      },
+      2018: {
+        title: "Primary School Grade 1",
+        desc: "Discovering elementary mathematics, Nepali literature, science, and English grammar.",
+        school: "Grade 1 Student",
+        tags: ["Grade 1", "Mathematics"]
+      },
+      2019: {
+        title: "Grade 2 - Fast Learning",
+        desc: "Developing strong interest in math puzzles, problem solving, and reading children's science books.",
+        school: "Grade 2 Student",
+        tags: ["Grade 2", "Logic Puzzles"]
+      },
+      2020: {
+        title: "Grade 3 - First Computer Operations",
+        desc: "First time operating a desktop computer, discovering painting apps, typing, and simple logic games.",
+        school: "Grade 3 Student",
+        tags: ["Grade 3", "First Computer Use"]
+      },
+      2021: {
+        title: "Grade 4 - Digital Exploration",
+        desc: "Exploring internet search engines, watching educational science videos, and learning basic computer concepts.",
+        school: "Grade 4 Student",
+        tags: ["Grade 4", "Internet Exploration"]
+      },
+      2022: {
+        title: "Grade 5 - Siddhartha Boarding Secondary School",
+        desc: "Thriving academically at Siddhartha Boarding Secondary School, Jhapa-7. Developing curiosity about how web pages work.",
+        school: "Siddhartha Boarding Secondary School (Class 5)",
+        tags: ["Siddhartha Boarding School", "Class 5"]
+      },
+      2023: {
+        title: "Class 6 - Writing First Code (HTML, CSS, Python)",
+        desc: "Wrote first lines of HTML tags and Python scripts! Experimented with styling web pages and terminal text outputs.",
+        school: "Siddhartha Boarding Secondary School (Class 6)",
+        tags: ["Class 6", "HTML/CSS", "Python Basics"]
+      },
+      2024: {
+        title: "Class 6 - Matrix UI & Cyber Terminal Projects",
+        desc: "Building matrix digital rain graphics, interactive terminal CLIs, and retro dark-mode user interfaces.",
+        school: "Siddhartha Boarding Secondary School (Class 6)",
+        tags: ["Matrix UI", "JavaScript", "Terminal CLI"]
+      },
+      2025: {
+        title: "Class 7 Entry - Advanced Web Development",
+        desc: "Entering Class 7 at Siddhartha Boarding Secondary School. Mastering JavaScript DOM, CSS Grid, Web Audio API, and canvas graphics.",
+        school: "Siddhartha Boarding Secondary School (Class 7)",
+        tags: ["Class 7", "Web Audio", "Canvas VFX"]
+      },
+      2026: {
+        title: "Class 7 Student & Web Architect (Present Era)",
+        desc: "Currently studying in Class 7 at Siddhartha Boarding Secondary School, Jhapa-7, Nepal. Architecting high-performance matrix web apps, life telemetry engines, and interactive portfolio experiences.",
+        school: "Siddhartha Boarding Secondary School (Class 7)",
+        tags: ["Class 7 @ Siddhartha Boarding", "Matrix Portfolio", "Web Architect"]
+      },
+      2027: {
+        title: "Class 8 - BLE Benchmark Prep",
+        desc: "Preparing for Basic Level Examination (Class 8) while mastering advanced Python, Data Structures, and API integration.",
+        school: "Siddhartha Boarding Secondary School (Class 8)",
+        tags: ["Class 8 BLE", "Data Structures", "Python"]
+      },
+      2028: {
+        title: "Class 9 - Secondary School Computer Science",
+        desc: "Deep diving into algorithms, full-stack web development, open-source contribution, and cybersecurity fundamentals.",
+        school: "Siddhartha Boarding Secondary School (Class 9)",
+        tags: ["Class 9", "Full-Stack Dev", "Cybersecurity"]
+      },
+      2029: {
+        title: "Class 10 - SEE Examination Horizon",
+        desc: "Preparing for the Secondary Education Examination (SEE) in Nepal while building complex web apps.",
+        school: "Siddhartha Boarding Secondary School (Class 10 SEE)",
+        tags: ["Class 10 SEE", "Computer Science"]
+      },
+      2030: {
+        title: "Higher Secondary (+2 Science / Computer Engineering)",
+        desc: "Pursuing +2 Science / Computer Science in Nepal, studying calculus, physics, and software engineering.",
+        school: "+2 Science / Computer Science",
+        tags: ["+2 Science", "Software Engineering"]
+      },
+      2035: {
+        title: "Future Vision - Global Computer Scientist & AI Architect",
+        desc: "Building innovative software applications, AI models, and cybersecurity tools to contribute to Nepal and global tech advancement.",
+        school: "B.S. Computer Science / AI Engineer",
+        tags: ["AI Architect", "Software Engineer", "Jhapa-7 Tech Leader"]
+      }
+    };
+
+    function onTimeSliderChange(yearVal) {
+      const year = parseInt(yearVal);
+      const milestone = timeMachineMilestones[year] || {
+        title: `Year ${year} - Chrono Timeline Era`,
+        desc: `Aadarsh Karki's ongoing journey in technology and computer science during ${year}.`,
+        school: year < 2030 ? `Siddhartha Boarding Secondary School / Academic Era` : `Higher Studies / CS Engineer`,
+        tags: ["Aadarsh Karki", "Nepal"]
+      };
+
+      const age = year - 2014;
+
+      const elYear = document.getElementById('tm-hud-year');
+      if (elYear) elYear.textContent = year;
+
+      const elLabel = document.getElementById('tm-current-year-label');
+      if (elLabel) elLabel.textContent = `${year} ERA (${year === 2026 ? 'PRESENT' : (year < 2026 ? 'PAST' : 'FUTURE')})`;
+
+      const elAge = document.getElementById('tm-hud-age');
+      if (elAge) elAge.textContent = `${age} Years Old`;
+
+      const elSchool = document.getElementById('tm-hud-school');
+      if (elSchool) elSchool.textContent = milestone.school;
+
+      const elCode = document.getElementById('tm-hud-era-code');
+      if (elCode) elCode.textContent = year;
+
+      const elTitle = document.getElementById('tm-hud-title');
+      if (elTitle) elTitle.textContent = milestone.title;
+
+      const elDesc = document.getElementById('tm-hud-desc');
+      if (elDesc) elDesc.textContent = milestone.desc;
+
+      const tagsContainer = document.getElementById('tm-hud-tags');
+      if (tagsContainer) {
+        tagsContainer.innerHTML = milestone.tags.map(t => `<span class="cyber-badge">${escapeHtml(t)}</span>`).join('');
+      }
+
+      // Update active year pills
+      document.querySelectorAll('.year-pill').forEach(pill => pill.classList.remove('active'));
+      const activePill = document.getElementById(`pill-${year}`);
+      if (activePill) activePill.classList.add('active');
+
+      playBleep(400 + (year - 2014) * 40, 'triangle', 0.05);
+    }
+
+    function scrubTimeMachine(year) {
+      const slider = document.getElementById('tm-slider');
+      if (slider) {
+        slider.value = year;
+        onTimeSliderChange(year);
+      }
+    }
+
+    /* ==========================================================================
+       3. WEB AUDIO SYNTHESIZER (RETRO BLEEPS)
+       ========================================================================== */
+    let audioEnabled = true;
+    let audioCtx = null;
+
+    function playBleep(freq = 600, type = 'sine', duration = 0.05) {
+      if (!audioEnabled) return;
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        // Audio fallback silent fail
+      }
+    }
+
+    document.getElementById('btn-sound').addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      document.getElementById('sound-status').textContent = audioEnabled ? 'ON' : 'OFF';
+      if (audioEnabled) playBleep(800, 'triangle', 0.1);
+    });
+
+    /* ==========================================================================
+       4. THEME ACCENT SWITCHER
+       ========================================================================== */
+    const themes = ['default', 'theme-cyan', 'theme-amber', 'theme-red'];
+    let currentThemeIdx = 0;
+
+    document.getElementById('btn-theme').addEventListener('click', () => {
+      document.body.classList.remove(...themes);
+      currentThemeIdx = (currentThemeIdx + 1) % themes.length;
+      if (themes[currentThemeIdx] !== 'default') {
+        document.body.classList.add(themes[currentThemeIdx]);
+      }
+      playBleep(1000, 'square', 0.08);
+    });
+
+    /* ==========================================================================
+       5. SKILLS FILTERING & INSPECTOR
+       ========================================================================== */
+    function filterSkills(category, btnElem) {
+      playBleep(500, 'sine', 0.04);
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      btnElem.classList.add('active');
+
+      const chips = document.querySelectorAll('.skill-chip');
+      chips.forEach(chip => {
+        if (category === 'all' || chip.getAttribute('data-cat') === category) {
+          chip.style.display = 'flex';
+        } else {
+          chip.style.display = 'none';
+        }
+      });
+    }
+
+    function inspectSkill(name, level, desc, codeSnippet) {
+      playBleep(750, 'triangle', 0.08);
+      openTerminalModal();
+      const body = document.getElementById('modal-cli-body');
+      
+      const skillLog = document.createElement('div');
+      skillLog.innerHTML = `
+        <div style="color: var(--accent-neon); font-weight: bold; margin-top: 8px;">
+          $ inspect_module --name "${name}"
+        </div>
+        <div style="color: var(--text-main); margin-left: 10px;">
+          > Proficiency Level : <span style="color: var(--accent-bright); font-weight: bold;">${level}</span><br>
+          > Description       : ${desc}<br>
+          > Sample Syntax     : <code style="color: var(--accent-neon); background: rgba(0,20,5,0.8); padding: 2px 6px;">${codeSnippet}</code>
+        </div>
+      `;
+      body.appendChild(skillLog);
+      body.scrollTop = body.scrollHeight;
+    }
+
+    /* ==========================================================================
+       6. INTERACTIVE TERMINAL CLI MODAL LOGIC
+       ========================================================================== */
+    const cliModal = document.getElementById('cli-modal');
+    const cliInputField = document.getElementById('cli-input-field');
+    const modalCliBody = document.getElementById('modal-cli-body');
+
+    function openTerminalModal() {
+      playBleep(800, 'square', 0.1);
+      cliModal.classList.add('active');
+      cliInputField.focus();
+    }
+
+    function closeTerminalModal() {
+      cliModal.classList.remove('active');
+    }
+
+    function closeModalOnOverlay(e) {
+      if (e.target === cliModal) {
+        closeTerminalModal();
+      }
+    }
+
+    document.getElementById('btn-cli-open').addEventListener('click', openTerminalModal);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && cliModal.classList.contains('active')) {
+        closeTerminalModal();
+      }
+    });
+
+    cliInputField.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const cmd = cliInputField.value.trim();
+        cliInputField.value = '';
+        if (cmd) {
+          executeCliCommand(cmd);
+        }
+      }
+    });
+
+    function executeCliCommand(cmd) {
+      playBleep(650, 'sine', 0.05);
+
+      // Append command prompt line
+      const cmdLine = document.createElement('div');
+      cmdLine.innerHTML = `<span style="color: var(--accent-bright); font-weight: bold;">aadash@jhapa-7:~$</span> ${escapeHtml(cmd)}`;
+      modalCliBody.appendChild(cmdLine);
+
+      const respLine = document.createElement('div');
+      respLine.style.marginBottom = '10px';
+
+      const cleanCmd = cmd.toLowerCase();
+
+      switch (cleanCmd) {
+        case 'help':
+          respLine.innerHTML = `
+            <div style="color: var(--accent-neon);">AVAILABLE COMMANDS:</div>
+            &nbsp;&nbsp;knowabout - Open Page B (Story & Time Machine)<br>
+            &nbsp;&nbsp;bio       - Display Aadarsh Karki profile & details<br>
+            &nbsp;&nbsp;school    - Show school (Siddhartha Boarding Secondary)<br>
+            &nbsp;&nbsp;skills    - List technical skills & proficiency<br>
+            &nbsp;&nbsp;projects  - Show deployed web projects<br>
+            &nbsp;&nbsp;runtime   - Show live Earth runtime counter<br>
+            &nbsp;&nbsp;location  - Information on Jhapa-7, Nepal<br>
+            &nbsp;&nbsp;clear     - Clear terminal output<br>
+            &nbsp;&nbsp;exit      - Close terminal modal
+          `;
+          break;
+
+        case 'knowabout':
+        case 'timemachine':
+        case 'story':
+        case 'pageb':
+          respLine.innerHTML = `> Switching system view to Page B (Know About Me & Time Machine)...`;
+          closeTerminalModal();
+          switchPage('b');
+          break;
+
+        case 'school':
+          respLine.innerHTML = `> School: Siddhartha Boarding Secondary School (Class 7) | Location: Jhapa-7, Nepal.`;
+          break;
+
+        case 'bio':
+          respLine.innerHTML = `
+            > Name: Aadarsh Karki (Aadash Karki)<br>
+            > School: Class 7 in Siddhartha Boarding Secondary School<br>
+            > DOB: 2014-02-27 (February 27, 2014) | Address: Jhapa-7, Nepal<br>
+            > Bio: Tech enthusiast, coder, and digital explorer passionate about web development and cyber aesthetics.
+          `;
+          break;
+
+        case 'skills':
+          respLine.innerHTML = `
+            > Skills: HTML5, CSS3, JavaScript, Python 3, Git, Linux CLI, Cyber UI, Web Audio API, React Basics.
+          `;
+          break;
+
+        case 'projects':
+          respLine.innerHTML = `
+            > 1. Matrix Rain Engine v2.0 (Canvas VFX)<br>
+            > 2. Cyber Shell Terminal CLI (JS UX)<br>
+            > 3. Earth Runtime Telemetry (Temporal Math)
+          `;
+          break;
+
+        case 'runtime':
+          const now = new Date();
+          const diffMs = now - dob;
+          const secs = Math.floor(diffMs / 1000);
+          respLine.innerHTML = `> Subject: Aadash Karki | Earth Runtime: ${secs.toLocaleString()} seconds lived.`;
+          break;
+
+        case 'location':
+          respLine.innerHTML = `> Coordinates: Jhapa-7, Jhapa District, Koshi Province, Nepal [26.5451° N, 87.8920° E].`;
+          break;
+
+        case 'clear':
+          modalCliBody.innerHTML = '';
+          return;
+
+        case 'exit':
+          closeTerminalModal();
+          return;
+
+        default:
+          respLine.innerHTML = `<span style="color: #ff5f56;">Command not recognized: '${escapeHtml(cmd)}'. Type 'help' for command list.</span>`;
+          break;
+      }
+
+      modalCliBody.appendChild(respLine);
+      modalCliBody.scrollTop = modalCliBody.scrollHeight;
+    }
+
+    function runProjectDemo(title, logOutput) {
+      openTerminalModal();
+      const body = document.getElementById('modal-cli-body');
+      
+      const demoLog = document.createElement('div');
+      demoLog.innerHTML = `
+        <div style="color: var(--accent-neon); font-weight: bold; margin-top: 8px;">
+          $ ./run_demo.sh --project "${title}"
+        </div>
+        <div style="color: var(--text-main); white-space: pre-wrap; font-size: 12.5px; background: rgba(0,15,4,0.9); padding: 10px; border: 1px solid var(--border-color); border-radius: 3px; margin-top: 4px;">
+${logOutput}
+        </div>
+      `;
+      body.appendChild(demoLog);
+      body.scrollTop = body.scrollHeight;
+    }
+
+    /* ==========================================================================
+       7. CONTACT PACKET TRANSMITTER
+       ========================================================================== */
+    function transmitPacket(e) {
+      e.preventDefault();
+      playBleep(900, 'square', 0.12);
+
+      const name = document.getElementById('inp-name').value;
+      const email = document.getElementById('inp-email').value;
+      const msg = document.getElementById('inp-msg').value;
+
+      const logWindow = document.getElementById('log-window');
+
+      const log1 = document.createElement('div');
+      log1.className = 'log-item info';
+      log1.textContent = `[${new Date().toLocaleTimeString()}] Encrypting message packet from ${name}...`;
+      logWindow.appendChild(log1);
+
+      setTimeout(() => {
+        const log2 = document.createElement('div');
+        log2.className = 'log-item info';
+        log2.textContent = `[+] Routing packet through Jhapa-7 Node Gateway...`;
+        logWindow.appendChild(log2);
+
+        setTimeout(() => {
+          const log3 = document.createElement('div');
+          log3.className = 'log-item success';
+          log3.textContent = `[✓] TRANSMISSION SUCCESSFUL (HTTP 200 OK). Thank you, ${name}!`;
+          logWindow.appendChild(log3);
+          logWindow.scrollTop = logWindow.scrollHeight;
+
+          // Clear inputs
+          document.getElementById('inp-name').value = '';
+          document.getElementById('inp-email').value = '';
+          document.getElementById('inp-msg').value = '';
+        }, 600);
+      }, 400);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
